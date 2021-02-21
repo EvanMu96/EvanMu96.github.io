@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>[东拼西凑] P and NP | Komoriii</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="嗨。It’s been a while.我又一次重新开始写博客了。我这个人对自己留下的幼稚的痕迹曾经十分厌恶，尤其是半途而废的幼稚痕迹。所以我的博客这次已经是第三次重启了，希望这次我能够做到以后看这些东西不会想着赶紧删掉。电影《寻梦环游记》里讲，人有三次死亡，第三次死亡即使被大家所遗忘。我已经从大学中拿着本科和硕士学位毕业，过几年也会加入奔三的队伍中。是时候在人类社会中，或者是在北冰洋的Githu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[东拼西凑] P and NP">
+<meta property="og:url" content="http://blog.senevan.com/2019/02/08/2019-02-08/index.html">
+<meta property="og:site_name" content="Komoriii">
+<meta property="og:description" content="嗨。It’s been a while.我又一次重新开始写博客了。我这个人对自己留下的幼稚的痕迹曾经十分厌恶，尤其是半途而废的幼稚痕迹。所以我的博客这次已经是第三次重启了，希望这次我能够做到以后看这些东西不会想着赶紧删掉。电影《寻梦环游记》里讲，人有三次死亡，第三次死亡即使被大家所遗忘。我已经从大学中拿着本科和硕士学位毕业，过几年也会加入奔三的队伍中。是时候在人类社会中，或者是在北冰洋的Githu">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-02-08T22:30:23.000Z">
+<meta property="article:modified_time" content="2021-02-21T14:12:33.747Z">
+<meta property="article:author" content="Komoriii">
+<meta name="twitter:card" content="summary"><meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">Komoriii</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post-2019-02-08" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      [东拼西凑] P and NP
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2019-02-08T22:30:23.000Z" itemprop="datePublished">2019-02-08</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>嗨。It’s been a while.我又一次重新开始写博客了。我这个人对自己留下的幼稚的痕迹曾经十分厌恶，尤其是半途而废的幼稚痕迹。所以我的博客这次已经是第三次重启了，希望这次我能够做到以后看这些东西不会想着赶紧删掉。电影《寻梦环游记》里讲，人有三次死亡，第三次死亡即使被大家所遗忘。我已经从大学中拿着本科和硕士学位毕业，过几年也会加入奔三的队伍中。是时候在人类社会中，或者是在北冰洋的Github备份中给自己留下几个Byte的位置了。<br>新博客的第一篇文章就是补充一篇上一次重启博客没有完成的学习笔记。笔记里的很多内容是参考了吴军博士的《数学之美》，维基百科和知乎上的解答，在这里感谢他们对P/NP这个未解之谜的解释。<br><b/>下面这段文字来自《数学之美》（作者：吴军博士）的附录，偏向于inituition。</b><br>计算机的算法效率是用计算复杂度(Computational Complexity)来衡量的。计算的时间显然和问题的大小有关。比如对10000个实数排序和对1000000个实数排序所用的时间是显然不同的。问题的大小在衡量计算时间复杂度时是变量，一般用N来表示。而计算量是N的一个函数f(N)。这个函数的边界可以用数学上的大O概念来限制。如果两个函数f(N)和g(N)在大O概念上相同，也就是说当N趋近于无穷大时，他们的比值只差一个常数。比如f(N)=N<em>log(N), g(N)=100</em>log(n)，他们就被看做是同一个数量级的。同样，如果两个计算机算法的计算在大O概念下相同，只差一个常数，我们认为它们的计算复杂度相同。计算的复杂度关键看函数而不是这个常数。<br>如果一个算法的计算量是N的多项式函数(Polynomial Function)，则认为这个算法是多项式函数复杂度的。如果一个问题存在一个多项式函数复杂度的算法，则这个问题成为P问题。如果计算量比N的多项式函数还要高，虽然理论上讲如果有无限的时间也是可以计算的（图灵机概念的可计算），但实际上市不可计算的。这时称为非多项式(NP)问题。比如找到每一步围棋的最佳走法就是一个NP问题。<br>如果一个NP问题，虽然找不到多项式函数复杂度的算法，但是对于一个算法可以再多项式函数复杂度的时间内证实这个方法正确与否。那么这个问题成为NP-Complete问题。如果一个问题，它的计算复杂度至少是NP-Complete，那么它被称作NP-Hard问题。换句话讲NPC问题是NP-Hard问题的一个子集。</p>
+<p><b/>以下的文字来源于我对维基百科和知乎上的文章的整理，也补充上了NP-C Problem的介绍。</b><br>P类问题：所有可以在多项式时间内求解的判定问题（返回一个yes/no）构成P类问题。比如验证一个数是否是质数，我们可以从2一直除到这个数本身来验证这个数有没有除了1和本身以外的factor。<br>NP类问题：所有非确定性多项式时间可解的判定问题构成NP类问题。比如在正整数集合中找到下一个质数。求解这个问题是不可以按部就班的解出来的，只能够靠猜或者是线性搜索。然而，验证一个数是否是质数是一个P问题。因此我们就有了下一个定义<br>NP-C问题：NP中的某些问题的复杂性与整个类的复杂性相关联。这些问题中任何一个如果存在多项式时间的算法，那么所有的问题都是多项式时间可解的。这些问题被称为NP-Complete问题。（即可以转换到一个关联的P问题）<br>人们发现，所有的完全多项式非确定性问题，都可以转换为一类满足性（验证）问题的逻辑运算问题。既然这类问题的所有可能答案都可以在多项时间内计算，人们就猜想，是否这类问题存在一个确定性的算法，可以在多项式时间内直接搜索出正确的答案，也就是所以P = NP这个假设是否成立呢？<br>举个例子，神经网络的optimization就是一个NP问题，我们可以用迭代的gradient descent不断向更优的方向逼近。然后用validation set验证结果的好坏。</p>
+
+      
+    </div>
+    
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2020/01/10/2020-01-10/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          [消费电子] Apple的T2芯片究竟是做什么的
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/01/19/%202019-01-19/" id="article-nav-older" class="article-nav-link-wrap older">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          [有始无终] A Brief Introduction to Reinforcement Learning
+        
+      </div>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

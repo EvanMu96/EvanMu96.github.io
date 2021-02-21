@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>[有始无终] A Brief Introduction to Reinforcement Learning | Komoriii</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta name="description" content="（文章背景：19年我本来以为自己MSc的论文要写RL相关的题目，然而后面临时改成了CV相关。那时候询着Dr.Po的邮件看到了UT的RL公开课。看完第一个Introduction视频做的笔记。）Some images or paragraph were cited from CS885 of Waterloo University. Thanks to Prof.Poupart for such a">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[有始无终] A Brief Introduction to Reinforcement Learning">
+<meta property="og:url" content="http://blog.senevan.com/2019/01/19/%202019-01-19/index.html">
+<meta property="og:site_name" content="Komoriii">
+<meta property="og:description" content="（文章背景：19年我本来以为自己MSc的论文要写RL相关的题目，然而后面临时改成了CV相关。那时候询着Dr.Po的邮件看到了UT的RL公开课。看完第一个Introduction视频做的笔记。）Some images or paragraph were cited from CS885 of Waterloo University. Thanks to Prof.Poupart for such a">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://farm8.staticflickr.com/7811/46164422064_6006329497_b.jpg">
+<meta property="article:published_time" content="2019-01-19T21:39:33.000Z">
+<meta property="article:modified_time" content="2021-02-21T14:12:33.747Z">
+<meta property="article:author" content="Komoriii">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://farm8.staticflickr.com/7811/46164422064_6006329497_b.jpg"><meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">Komoriii</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      <article id="post- 2019-01-19" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="headline name">
+      [有始无终] A Brief Introduction to Reinforcement Learning
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2019-01-19T21:39:33.000Z" itemprop="datePublished">2019-01-19</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>（文章背景：19年我本来以为自己MSc的论文要写RL相关的题目，然而后面临时改成了CV相关。那时候询着Dr.Po的邮件看到了UT的RL公开课。看完第一个Introduction视频做的笔记。）<br>Some images or paragraph were cited from CS885 of Waterloo University. Thanks to Prof.Poupart for such an amazing course.</p>
+<h2 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h2><ul>
+<li>Introduction to Reinfocement Learning</li>
+</ul>
+<h2 id="Introduction-to-Reinforcement-Learning"><a href="#Introduction-to-Reinforcement-Learning" class="headerlink" title="Introduction to Reinforcement Learning"></a>Introduction to Reinforcement Learning</h2><h3 id="Old-paradigm-vs-New-Paradigm"><a href="#Old-paradigm-vs-New-Paradigm" class="headerlink" title="Old paradigm vs. New Paradigm"></a>Old paradigm vs. New Paradigm</h3><p>In the tradational computer science method, we need to program every action of computer. Because the progressive research of Machine Learning field, we can provide some examples to computer, making it learn to accomplish a task based on examples. That is generally called supervised (machine) learning.<br>However, to let machines learn a task need a lot of examples or data. We could label all of the data but that is so laborious. Alternatively, unsupervised learning or semi-supervised learning is more realistic and smart for huge mount of data. There is another method which neither supervised nor unspuervised, the reinforcement learning.</p>
+<h3 id="What-is-Reinforcement-Learning"><a href="#What-is-Reinforcement-Learning" class="headerlink" title="What is Reinforcement Learning?"></a>What is Reinforcement Learning?</h3><p>Some well-known nickname, AKA  </p>
+<ul>
+<li>Optimal control</li>
+<li>Approximate dynamic programming</li>
+<li>Neuro-dynamic programming  </li>
+</ul>
+<p>Here is the definition from Wikipedia, you can read this paragrahph for a general view.<br>Reinforcement learning is an area of machine learning inspired by behavioural psychology, concerned with how software agents ought to take actions in an environment so as to maximize some notion of cumulative reward.<br>Just like the artifical neural network borrowed the concept of neuron. The reiforcement learning is alsor inspired from creatures.<br>If you want to train a dog to do some specific reactions, you need to reward it when the dog did the correct reactions, for example pleasure and food. On the opposite, some negative reward should be applied when the dog did bad. That is the basic idea to do reforcement for training a dog. If we do the similar things to a machine, that is so called reiforcement learning!  </p>
+<h3 id="The-components-in-Reiforcement-Learning-Problem"><a href="#The-components-in-Reiforcement-Learning-Problem" class="headerlink" title="The components in Reiforcement Learning Problem"></a>The components in Reiforcement Learning Problem</h3><p>We need to train an agent instead of a dog for a general reinforcement learning task. So the first component should be the Agent. Except the agent, the all of other things are enviorment of the agent. The agent can change the state of environment by actions, then the environment feedback reward to agent, which is what a reinforcenemt learning system do.<br><a data-flickr-embed="true"  target="_blank" rel="noopener" href="https://www.flickr.com/photos/166826763@N02/46164422064/in/dateposted-public/" title="reiforcement learning"><img src="https://farm8.staticflickr.com/7811/46164422064_6006329497_b.jpg" width="1024" height="611" alt="reiforcement learning"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script></p>
+<h3 id="Is-there-any-examples-of-RL"><a href="#Is-there-any-examples-of-RL" class="headerlink" title="Is there any examples of RL"></a>Is there any examples of RL</h3><p>Sure. You may know the famous system developed by DeepMind, the AlphaGO is totally benefited by reinforcement learning. If you are a video game fans you may know there is a competition for traininig an AI to battle with Starcraft. Here I list few task examples which applied or could apply reinforcement learning.</p>
+<ul>
+<li><p>Game Playing(Go, atari, Starcraft)</p>
+</li>
+<li><p>Operations research(pricing, veichle routing)</p>
+</li>
+<li><p>Elevator control</p>
+</li>
+<li><p>Motor balance control (RL instead of PID I think?)</p>
+</li>
+<li><p>Spoken dialog systems</p>
+</li>
+<li><p>Data center energy optimization (some company do this by RL and the result is pretty good)</p>
+</li>
+<li><p>Self-managing network systems</p>
+</li>
+<li><p>Autonomous Vehicles (I think it is not a good idea for autonomous car… maybe other vehicle)</p>
+</li>
+<li><p>Computation Finance (My research topics currently)  </p>
+<p>I would like to write more about the RL in Computational Finance.<br>In an automated trading system.</p>
+</li>
+<li><p>Agent: Trading software(trading bot)</p>
+</li>
+<li><p>Environment: other traders and the market</p>
+</li>
+<li><p>State: Price history and current price</p>
+</li>
+<li><p>Action: basic stock actions, buy/sell/hold etc</p>
+</li>
+<li><p>Reward: The Profit. Money.  </p>
+</li>
+</ul>
+<p>Definitely we want to maximize our PROFIT.</p>
+<h3 id="Overview-of-the-RL"><a href="#Overview-of-the-RL" class="headerlink" title="Overview of the RL"></a>Overview of the RL</h3><p><b>Comprehensive, but challenging form of machine learning.</b>  </p>
+<ul>
+<li><p>Stochastic environment</p>
+</li>
+<li><p>Incomplete model (hardly to model but easy to behave by human)</p>
+</li>
+<li><p>Interdependent sequence if decision.</p>
+</li>
+<li><p>No supervision</p>
+</li>
+<li><p>Partial and delayed feedback (Some lag exists)  </p>
+<p><b>- Long term goal: lifelong machine learning</b><br>Thank you for reading.</p>
+<h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference:"></a>Reference:</h3><p><a target="_blank" rel="noopener" href="https://cs.uwaterloo.ca/~ppoupart/teaching/cs885-spring18/schedule.html">https://cs.uwaterloo.ca/~ppoupart/teaching/cs885-spring18/schedule.html</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+  </div>
+</article>
+
+  
+<nav id="article-nav" class="article-nav">
+  
+    <a href="/2019/02/08/2019-02-08/" id="article-nav-newer" class="article-nav-link-wrap newer">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          [东拼西凑] P and NP
+        
+      </div>
+    </a>
+  
+  
+    <span id="article-nav-older" class="article-nav-link-wrap older"></span>
+  
+</nav>
+
+
+
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>

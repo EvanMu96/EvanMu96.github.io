@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Komoriii</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Komoriii">
+<meta property="og:url" content="http://blog.senevan.com/index.html">
+<meta property="og:site_name" content="Komoriii">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="Komoriii">
+<meta name="twitter:card" content="summary"><meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+  <div id="wrapper">
+    <header id="header">
+  <h1 id="title">
+    <a href="/">Komoriii</a>
+  </h1>
+  <nav>
+    
+    
+      
+      <a class="nav-link" href="/">Home</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/archives">Archives</a>
+    
+      
+        <span class="nav-spacer">×</span>
+      
+      <a class="nav-link" href="/About-Me/">About</a>
+    
+    
+  </nav>
+</header>
+
+    <div id="content">
+      
+  
+    <article id="post-2021-02-02" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="name">
+      <a href="/2021/02/02/2021-02-02/">[C++]实现std::move和std::forward</a>
+      
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2021-02-02T16:57:41.000Z" itemprop="datePublished">2021-02-02</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>C++11的<code>std::move</code>我至少看过至少5遍不同的书以及cppreference说它和内存操作无关, 但是我自己的代码中很少会主动用到它所以偶尔用一次就出了UB.<br>所以我觉得自己对着标准库的代码写一下<code>std::move</code>, 以及顺便写一下<code>std::forward</code>. 无论如何, 以后打开博客就回想起, std::move的行为不是名字上写的move(物理)了.</p>
+<h3 id="move"><a href="#move" class="headerlink" title="move"></a>move</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line"><span class="keyword">constexpr</span> <span class="keyword">typename</span> <span class="built_in">std</span>::remove_reference&lt;_Tp&gt;::type&amp;&amp; <span class="comment">//rvalue</span></span><br><span class="line">move(_Tp&amp;&amp; <span class="keyword">__t</span>)<span class="keyword">noexcept</span> <span class="comment">// argument is a universal reference</span></span><br><span class="line">&#123; <span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;<span class="keyword">typename</span> <span class="built_in">std</span>::remove_reference&lt;_Tp&gt;::type::type&amp;&amp;&gt;(<span class="keyword">__t</span>);&#125; <span class="comment">// convert to rvalue reference</span></span><br></pre></td></tr></table></figure>
+<p>总结一下就是它把一个对象转成rvalue reference, 不会destruct掉被Move过的对象,所以,在一个复合数据结构中把一个部分给move后不要留着已经被move的对象.</p>
+<h3 id="forward"><a href="#forward" class="headerlink" title="forward"></a>forward</h3><p><code>std::forward</code>是用来实现完美转发的函数, 同样它也是只依靠类型转换实现的.<br>Effective Modern C++ 有完整的一个篇文章<b><a target="_blank" rel="noopener" href="https://github.com/kelthuzadx/EffectiveModernCppChinese/blob/master/5.RRefMovSemPerfForw/item25.md">例子</a></b>来讲什么时候需要用<code>std::forward</code>, 尤其是函数的参数是一个universal reference时, 要正确的解决lvalue reference和rvalue reference传入这两种情况, 势必要使用<code>std::forward</code>, 如果这时断然地用<code>std::move</code>会导致传入的左值被move走而调用函数的人不自知的情况.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line"><span class="keyword">constexpr</span> _Tp&amp;&amp;</span><br><span class="line">forward(<span class="keyword">typename</span> <span class="built_in">std</span>::remove_reference&lt;_Tp&gt;::type&amp; <span class="keyword">__t</span>) <span class="keyword">noexcept</span> <span class="comment">// lvalue reference</span></span><br><span class="line">&#123; <span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;_Tp&amp;&amp;&gt;(<span class="keyword">__t</span>);&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line"><span class="keyword">constexpr</span> _Tp&amp;&amp;</span><br><span class="line">forward(<span class="keyword">typename</span> <span class="built_in">std</span>::remove_reference&lt;_Tp&gt;::type&amp;&amp; <span class="keyword">__t</span>) <span class="keyword">noexcept</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">static_assert</span>(!<span class="built_in">std</span>::is_lvalue_reference&lt;_Tp&gt;::value);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;_Tp&amp;&amp;&gt;(<span class="keyword">__t</span>);</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+  </div>
+</article>
+
+
+
+  
+    <article id="post-2021-01-02" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="name">
+      <a href="/2021/01/05/2021-01-02/">[南来北往]京沪卧铺动车乘坐体验</a>
+      
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2021-01-05T00:08:40.000Z" itemprop="datePublished">2021-01-05</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>12月份体验了一次从上海出发到北京的动车卧铺.买这趟车的最主要的原因是当周的机票已经非常贵了,来回的动卧的价格就算是一等车厢也只需要1000元左右.坐这趟车的不到3周前浦东是有确诊的新冠病例的,也是我行程推迟,买不到价格合适的机票的原因.</p>
+<p>本来我是觉得动卧能省下一晚的住宿费的,然而当我开始想睡的时候问题来了,除非是睡眠质量非常非常好的人,就算不考虑噪音也是很难在这种晃晃悠悠的车厢空间内安然入睡的.所以如果你们和我一样对睡眠环境有一丁点的要求,买动卧的时候也要做好难以入睡的准备.</p>
+<p>如果下次能够买到1400元左右的飞机票我觉得我是不会买动卧的了.最后上两张自己拍的照片吧.<br><img src="/images/IMG_5619.jpeg" alt="train"><br><img src="/images/IMG_5620.jpeg" alt="cabin"></p>
+
+      
+    </div>
+    
+    
+    
+  </div>
+</article>
+
+
+
+  
+    <article id="post-2020-01-01" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="name">
+      <a href="/2021/01/05/2020-01-01/">[最近的日常]2020年末装机杂记</a>
+      
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2021-01-05T00:00:45.000Z" itemprop="datePublished">2021-01-05</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>先上配置</p>
+<ul>
+<li>AMD Ryzen 3600</li>
+<li>ASUS B550 主板</li>
+<li>16GB x 2 金士顿 HyerX</li>
+<li>1T 希捷SSD</li>
+<li>NVIDIA 1660s GPU</li>
+</ul>
+<p>我的需求</p>
+<ul>
+<li>个人编程开发 有Windows环境方便开发游戏的同时有剩余的性能开虚拟机 50%</li>
+<li>2020前后2年的新游戏能够流畅游玩 50%</li>
+</ul>
+<p>总共的成本落在了6500块,加上手残自己没点亮又没时间就找了装机师傅又花了120块人工费.</p>
+<p>这样一来我也顺便对手里所有的电子设备做一个功能划分和生命周期估算,毕竟最近突然多了一个十万块的预期支出.</p>
+<ul>
+<li>iPhone XR  收消息,等编译的时间摸鱼 计划在2021年冬天换成新一代的苹果的budget iPhone</li>
+<li>MacBook Pro 2018 移动办公/非系统级的应用开发 计划在2022年换成 Apple Silicon的ARM版Air</li>
+<li>组装台式机 主力开发,虚拟机,第二游戏平台 根据必要性进行扩展</li>
+<li>PS4 slim 第一游戏平台,独占游戏 PS5 如无非常非常想玩的独占,第一个周期内更新时购买更新款</li>
+<li>潜在的支出: 群晖NAS 这玩意儿甚至我在京东上曾经下单过,虽然下单不到半天就冷静推掉了.优先级较低, 暂时通过稳定的网络服务以及购买付费的同步服务避免自己维护</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+  </div>
+</article>
+
+
+
+  
+    <article id="post-2020-11-24" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="name">
+      <a href="/2020/11/23/2020-11-24/">[我的推荐列表]动画推荐列表</a>
+      
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-11-23T00:36:13.000Z" itemprop="datePublished">2020-11-23</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>这个POST用来记录我比较推荐的动画列表.<br>用blog记录喜欢的动画的想法启发自 <a target="_blank" rel="noopener" href="https://imtwice.cn/twices-anime-list/">https://imtwice.cn/twices-anime-list/</a> .</p>
+<p>Tier 1</p>
+<ul>
+<li>星际牛仔</li>
+<li>回转企鹅罐</li>
+<li>红辣椒paprika</li>
+<li>天气之子</li>
+</ul>
+<p>Tier 2</p>
+<ul>
+<li>机动战士高达Unicorn (OVA)</li>
+<li>龙的牙医</li>
+<li>千年女优</li>
+<li>福音战士新剧场版 破</li>
+<li>命运石之门</li>
+<li>JOJO的奇妙冒险 不灭钻石</li>
+<li>JOJO的奇妙冒险 星尘十字军</li>
+<li>你的名字</li>
+<li>狂赌之渊/ 狂赌之渊xx</li>
+<li>Macross Plus OVA</li>
+<li>烟草 kemurikusa</li>
+<li>吹响!上低音号 第一季/第二季/剧场版/利兹与青鸟</li>
+<li>来自新世界 (仅推荐动画作为入门然后去看小说)</li>
+</ul>
+<p>Tier 3</p>
+<ul>
+<li>福音战士新剧场版 序</li>
+<li>福音战士新剧场版 </li>
+<li>机动战士高达00 TV 第一季/第二季/剧场</li>
+<li>Macross F (仅剧场版两部 虚空歌姬/恋离飞翼)</li>
+<li>Aldnoah Zero (第一部)</li>
+<li>JOJO的奇妙冒险 黄金之风</li>
+<li>四月是你的谎言</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+  </div>
+</article>
+
+
+
+  
+    <article id="post-2020-11-23" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="name">
+      <a href="/2020/11/22/2020-11-23/">[文章备份][转载]如何排解政治性抑郁</a>
+      
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-11-22T23:47:32.000Z" itemprop="datePublished">2020-11-22</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>原文作者: 邓艾艾艾<br>原文发布于: 微信公众号「雪豹樱桃」</p>
+<p>如何排解政治性抑郁，这是我被问过次数最多的一个问题。</p>
+<p>我本身也不是一个在情绪上很通坦的人，讲如何排解似乎也不太具有说服力，我会尝试在观测的经验上作一些纸面清谈。不过，人不可能绝对剥离自我存在对感受的支配，就算能做对所有的题目，明白一切的道理，进入那样的状态时，自由抽离的权利终究是临场失踪的。</p>
+<p>我不知道这个词是为何而发明的，但我看到它后，无需任何解释，就立刻明白它的体验指向。有人说，这是近年来才有的集体心理现象，在“美好的旧日时光”里不会生发。这也许是因为，那时你只是个唱着“我们的祖国是花园”的小学生，有不关心、不知道所赠予的花园笑脸特权，在那美好时光的不显眼角落里，同样有着苦闷与不解的零余青年。</p>
+<p>政治性抑郁伴随政治立场而生，主要来源于自身意识与环境的冲突，由此我以为可以分为两类，相对政治抑郁与绝对政治抑郁。前者是自己的政治立场与周围大部分人有差异所致，后者则是因为这个世界的绝对事实不符合自己政治立场的预期。</p>
+<p>相对抑郁在缺乏多元性，主流思潮单调、强大且包容性较低的地方更易发生。譬如，如果大部分人都认为女人一定要生孩子，而同性恋是一种不正常行为，这时候，持不同观念的人在现实中就会变得相对孤立。但这种情况也较容易排解，因为他们其实并不对自己的立场有什么严重的怀疑，只是和应乏声，而生压抑。我以为，此时不必太过自我暗示身边人与自己的价值冲突，保持原则的相信，拒绝行为的干涉，在此之外可对周遭做世俗化处理，而去往更广阔的世界，例如网络上，寻求琴瑟的远方支持，并不是说要钻入信息茧房，而是少数派更要联合起来共振以保护自己不被宏大的波浪所淹没。</p>
+<p>不上网，不看新闻，这是人们通常认为的逃避政治抑郁的办法，它可能对解决绝对抑郁有所帮助，但对于相对抑郁，即使封锁了稀星重露的连通，也依然要面对周围言之凿凿的口水，逃离是没有用的，不如互相发出声音与光芒。</p>
+<p>至于绝对抑郁，我以为，在大环境不改变的现实里，无法解决，我们也无法苛求一个连自我都疲于照顾的人去改变世界。这时候，切断向世界的联系，逃到自我的深处躲避，或许是最无奈的通道。</p>
+<p>世界会变好吗，这是绝对抑郁里最核心的问题，我不敢回答。</p>
+<p>高中的时候，在语文课上学《面朝大海，春天花开》，老师讲，这是一首很温暖的、激励人心的诗，那时我并不了解海子，却总隐约觉得，“从明天起，做一个幸福的人”这句话里有一种难以言说的绝望。</p>
+<p>我现在想，这不是一首关于温暖与幸福的诗，或许是温暖的，但不是阳光那样的温暖，是让其他绝望的人，晓得阳光照不到的地方，不仅只有他们那一处。</p>
+<p>你毫不怀疑，如果你什么都不知道，大概会比现在快乐很多，但，你要为了这快乐而跳进深渊吗。</p>
+
+      
+    </div>
+    
+    
+    
+  </div>
+</article>
+
+
+
+  
+    <article id="post-2020-08-16" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="name">
+      <a href="/2020/08/16/2020-08-16/">[最近的日常]成为了游戏服务器程序员</a>
+      
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-08-16T19:20:24.000Z" itemprop="datePublished">2020-08-16</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <h2 id="最近在干什么"><a href="#最近在干什么" class="headerlink" title="最近在干什么"></a>最近在干什么</h2><p>距离上一篇博客的发布日期已经过去好久了，中间我也想过要不要写点东西发出来。工作之后学到一些东西，但是又没时间梳理语言。还是尽可能的写点东西锻炼一下自己的表达能力。</p>
+<p>今年4月初正式去了一家规模还算可以的游戏公司入职，入职之后看了三套网络游戏的服务器代码，其中一套是现在自己仍然在维护的一个线上项目，也就是我现在上班的日常工作。</p>
+<h2 id="入职以来在做什么"><a href="#入职以来在做什么" class="headerlink" title="入职以来在做什么"></a>入职以来在做什么</h2><p>首先我还再在继续学C++，因为 C++ 真的是包罗万象。</p>
+<p>要驾驭好 C++ 并不简单，在掌握基本语法之后至少要学不少 idiom ， 比如至少要看过著名的 <i>Effective C++</i>， 才能避免各种让人头大的未定义行为，将 C++ 开发的性能优势尽可能的发挥出来。</p>
+<p>其次就是一些熟悉一些网络游戏服务器的设计架构了，相对而言并不是很难。</p>
+<h2 id="工作的内容是怎样的"><a href="#工作的内容是怎样的" class="headerlink" title="工作的内容是怎样的"></a>工作的内容是怎样的</h2><p>写游戏逻辑是游戏公司服务器程序员做的最多的一项工作，这种工作就像互联网公司一样是无穷无尽的 CRUD，时间久了，写多了就自然而然会对着感到无趣。尤其是面对历史包袱导致的屎山代码， 就仿佛未来的我对着我这篇不成熟的文章， 恨不得穿越到屏幕的另一侧锤原来的作者。</p>
+<p>游戏的开发流程可以用版本作为一个标准单位。版本初期，首先策划头脑风暴想好策划案，然后交给程序来实现，开发的过程中程序也会不断找策划确认需求的细节。完工后验收项目的基本玩法，再交给QA去测试一些边界情况和线上的兼容性。QA 反馈完所有的 Bug 并且尽数修复后，一个版本也就完工准备发布了。</p>
+<h2 id="游戏服务器和Web服务器有什么区别"><a href="#游戏服务器和Web服务器有什么区别" class="headerlink" title="游戏服务器和Web服务器有什么区别"></a>游戏服务器和Web服务器有什么区别</h2><p>非要从本质上讲的话没区别，就像云风前辈的 skynet 游戏服务器框架也可以用在其他的服务上一样。因为游戏是模拟现实生活的，游戏的商城也是简易版的现实的电商网站。至于不同的游戏类型，MMORPG ，放置类游戏，卡牌游戏，其架构也是百花齐放，不存在所谓的「最好的游戏服务器架构」。</p>
+<p>游戏服务器里大量使用数据驱动的开发方式，大量的功能都抽象成游戏组件供策划完成下一步的内容产出。比如一个副本可以通过excel配置里面的出现的怪物的id/ 数量/ 等级， 然后在另一份怪物的配置中通过配置 lua 脚本/ 行为树/ 状态机配置怪物的行动，而怪物又对应到另一张表里配置可能掉落的道具。因此，修改这些配置的时候，并不需要彻底的停服，只需要让服务器重新加载一遍配置文件就可以完成更新。</p>
+<h2 id="关于自己技术的发展规划"><a href="#关于自己技术的发展规划" class="headerlink" title="关于自己技术的发展规划"></a>关于自己技术的发展规划</h2><p>其实之前这个部分不是「发展规划」，现在看之前写的那个部分有点无病呻吟，于是果断删掉写一个更加实际的话题。  </p>
+<p>坦白讲，中国游戏行业的换皮现象很严重，现在的一些服务器也是祖传且换皮多次的，技术上的求稳也使整体的技术较为落后。这一点主要在服务器上尤为明显，而客户端的技术迭代欣欣向荣，每年都有更有趣的技术出现，每年 GDC 都能看到很多有趣的 talk 。所以尽管工作中主要做服务器，但是我也会抽出时间复习一下在城大学的图形学然后去学习一下游戏引擎的使用和设计。毕竟，谁没有梦想自己做一款大家认可好玩的游戏呢？</p>
+
+      
+    </div>
+    
+    
+    
+  </div>
+</article>
+
+
+
+  
+    <article id="post-2020-03-25" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="name">
+      <a href="/2020/03/25/2020-03-25/">[LeetCode] 数组的区间信息类型题目</a>
+      
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-03-25T00:22:56.000Z" itemprop="datePublished">2020-03-25</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>之前在知乎上看到有算法竞赛经历的同学曾经提到过「线段树」「树状数组」这两种特殊的树型数据结构, 后来19年找工作前在leetcode上联系发现每次遇到维护区间信息的题目的时候有可以用到这几种数据结构,因此随手记两道典型的题目用于备忘.</p>
+<h2 id="线段树-307-Range-Sum-Query-Mutable"><a href="#线段树-307-Range-Sum-Query-Mutable" class="headerlink" title="线段树: 307. Range Sum Query - Mutable"></a>线段树: 307. Range Sum Query - Mutable</h2><h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>给定一个整数数组  nums，求出数组从索引 i 到 j  (i ≤ j) 范围内元素的总和，包含 i,  j 两点。</p>
+<p>update(i, val) 函数可以通过将下标为 i 的数值更新为 val，从而对数列进行修改。</p>
+<p>示例:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; Given nums &#x3D; [1, 3, 5]</span><br><span class="line"></span><br><span class="line">sumRange(0, 2) -&gt; 9</span><br><span class="line">update(1, 2)</span><br><span class="line">sumRange(0, 2) -&gt; 8</span><br></pre></td></tr></table></figure>
+<p>说明:</p>
+<p>数组仅可以在 update 函数下进行修改。<br>你可以假设 update 函数与 sumRange 函数的调用次数是均匀分布的。</p>
+<p>来源：力扣（LeetCode）<br>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/range-sum-query-mutable">https://leetcode-cn.com/problems/range-sum-query-mutable</a><br>著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+<h3 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h3><p>线段树也是一种二叉搜索树。线段树有一个特点是，只有leaf节点是实在的元素，而其余的节点都表示多个元素的和。线段树使用的场景也是用来存储可以做区间加法的元素，并且需要大量地计算某个区间的和，而不是取具体某个节点的值「因为需要直接取值干脆就用vector了，可以O(1)随机存取」。下图是一个非常简单的线段树的例子，蓝色节点表示是多个节点的和，橙色的节点表示的是叶节点，与题目中的num相对应。</p>
+<p>线段树相比于一般的二叉搜索树的游戏在于，在查询一个区间的和的时候有着O（logN）的时间复杂度。</p>
+<p><img src="/images/segmenttreedemo.png" alt="segmenttreedemo"></p>
+<p>构建一棵线段树可以从任意一个空或非空的数组/向量开始，后续可以使用update(i, val)方法修改index为i的叶节点的值为val「我们由于在线段树中删除和添加的操作，实际的语义都是添加一个线段/删除一个线段，并且涉及到在查询的时候查询的区间可能并不构成一个线段，比如查询0<del>10但是实际是0</del>5和8~10两个线段，所以对于添加和删除暂且不做深入」。</p>
+<p>回归到LeetCode 307这一道题目，下面我给出的代码大致上参考了花花的LeetCode307教程[2]。我个人非常推荐在找工作的同学去看花花的Youtube频道或者他个人网站上的思路讲解, 我对于DP的入门就是来自他的视频讲解.</p>
+<details>
+  <summary>点击查看代码</summary>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="comment">// 一种特殊的二叉搜索树 线段树</span></span><br><span class="line"><span class="comment">// 线段树的树叶节点是真实插入的元素 其余的节点都表示一个区间和</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SegmentTreeNode</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    SegmentTreeNode(<span class="keyword">int</span> start, <span class="keyword">int</span> end, <span class="keyword">int</span> sum = <span class="number">0</span>, SegmentTreeNode* left = <span class="literal">nullptr</span>,</span><br><span class="line">                                                 SegmentTreeNode* right = <span class="literal">nullptr</span>):</span><br><span class="line">        start(start), end(end), sum(sum), left(left), right(right) &#123;&#125;</span><br><span class="line">    SegmentTreeNode(<span class="keyword">const</span> SegmentTreeNode&amp;) = <span class="keyword">delete</span>; <span class="comment">// disable copy construction</span></span><br><span class="line">    SegmentTreeNode&amp; <span class="keyword">operator</span>=(<span class="keyword">const</span> SegmentTreeNode&amp;) = <span class="keyword">delete</span>; <span class="comment">// disable asssignment</span></span><br><span class="line">    ~SegmentTreeNode() &#123;</span><br><span class="line">        <span class="keyword">delete</span> left;</span><br><span class="line">        <span class="keyword">delete</span> right;</span><br><span class="line">        left = right = <span class="literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">int</span> start; <span class="comment">// start of index</span></span><br><span class="line">    <span class="keyword">int</span> end; <span class="comment">// end of index (included)</span></span><br><span class="line">    <span class="keyword">int</span> sum; <span class="comment">// sum of the range</span></span><br><span class="line">    SegmentTreeNode* left; <span class="comment">// left subTree</span></span><br><span class="line">    SegmentTreeNode* right; <span class="comment">// right subTree</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NumArray</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    NumArray(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; nums) &#123;</span><br><span class="line">        nums_.swap(nums);</span><br><span class="line">        <span class="keyword">if</span>(!nums_.empty()) root_.reset(buildTree(<span class="number">0</span>, nums_.size() - <span class="number">1</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">update</span><span class="params">(<span class="keyword">int</span> i, <span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">        updateTree(root_.get(), i, val);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">sumRange</span><span class="params">(<span class="keyword">int</span> i, <span class="keyword">int</span> j)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> sumRange(root_.get(), i, j);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; nums_;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;SegmentTreeNode&gt; root_;</span><br><span class="line">    <span class="comment">// initialize a SegmentTree</span></span><br><span class="line">    <span class="function">SegmentTreeNode* <span class="title">buildTree</span><span class="params">(<span class="keyword">int</span> start, <span class="keyword">int</span> end)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(start == end) <span class="comment">// only 1 element, this is a leaf node</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Build a leaf: &quot;</span> &lt;&lt; nums_[start] &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> SegmentTreeNode(start, end, nums_[start]);</span><br><span class="line">        &#125;</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">int</span> mid = start + (end - start) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">auto</span> left = buildTree(start, mid);</span><br><span class="line">        <span class="keyword">auto</span> right = buildTree(mid + <span class="number">1</span>, end);</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Build a non-leaf, the sum is:&quot;</span> &lt;&lt; left-&gt;sum + right-&gt;sum &lt;&lt; <span class="built_in">endl</span>; </span><br><span class="line">        <span class="keyword">auto</span> node = <span class="keyword">new</span> SegmentTreeNode(start, end, left-&gt;sum + right-&gt;sum, left, right);</span><br><span class="line">        <span class="keyword">return</span> node;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">updateTree</span><span class="params">(SegmentTreeNode* root, <span class="keyword">int</span> i, <span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(root-&gt;start == i &amp;&amp; root-&gt;end == i) &#123;</span><br><span class="line">            root-&gt;sum = val;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> mid = root-&gt;start + (root-&gt;end - root-&gt;start) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span>(i &lt;= mid) &#123;</span><br><span class="line">            updateTree(root-&gt;left, i, val);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> updateTree(root-&gt;right, i, val);</span><br><span class="line">    </span><br><span class="line">        root-&gt;sum = root-&gt;left-&gt;sum + root-&gt;right-&gt;sum;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">sumRange</span><span class="params">(SegmentTreeNode* root, <span class="keyword">int</span> i, <span class="keyword">int</span> j)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(i == root-&gt;start &amp;&amp; j == root-&gt;end) <span class="keyword">return</span> root-&gt;sum;</span><br><span class="line">        <span class="comment">//cout &lt;&lt; root-&gt;sum &lt;&lt; &quot; &quot;;</span></span><br><span class="line">        <span class="keyword">int</span> mid = root-&gt;start + (root-&gt;end - root-&gt;start) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span>(j &lt;= mid) &#123;</span><br><span class="line">            <span class="keyword">return</span> sumRange(root-&gt;left, i, j);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span>(i &gt; mid) &#123;</span><br><span class="line">            <span class="keyword">return</span> sumRange(root-&gt;right, i, j);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">return</span> sumRange(root-&gt;left, i, mid) + sumRange(root-&gt;right, mid + <span class="number">1</span>, j);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; v = &#123;<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>&#125;;</span><br><span class="line">    <span class="function">NumArray <span class="title">n</span><span class="params">(v)</span></span>;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; n.sumRange(<span class="number">0</span>, <span class="number">2</span>) &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    n.update(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; n.sumRange(<span class="number">0</span>, <span class="number">2</span>) &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</details>
+
+<h2 id="493-翻转对-Reverse-Pairs"><a href="#493-翻转对-Reverse-Pairs" class="headerlink" title="493. 翻转对 Reverse Pairs"></a>493. 翻转对 Reverse Pairs</h2><h3 id="题目描述-1"><a href="#题目描述-1" class="headerlink" title="题目描述"></a>题目描述</h3><p>给定一个数组 nums ，如果 i &lt; j 且 nums[i] &gt; 2*nums[j] 我们就将 (i, j) 称作一个重要翻转对。</p>
+<p>你需要返回给定数组中的重要翻转对的数量。</p>
+<p>示例:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">输入: [1,3,2,3,1]</span><br><span class="line">输出: 2</span><br><span class="line"></span><br><span class="line">输入: [2,4,3,5,1]</span><br><span class="line">输出: 3</span><br><span class="line"></span><br><span class="line">注意:</span><br><span class="line">给定数组的长度不会超过50000。</span><br><span class="line">输入数组中的所有数字都在32位整数的表示范围内</span><br></pre></td></tr></table></figure>
+
+
+<p>来源：力扣（LeetCode）<br>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/reverse-pairs">https://leetcode-cn.com/problems/reverse-pairs</a><br>著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+<h3 id="设计思路-1"><a href="#设计思路-1" class="headerlink" title="设计思路"></a>设计思路</h3><p>题目要找到所有的在序列中位置靠前但是比靠后的元素大两倍的pair.<br>首先需要介绍树状数组Fenwick Tree.<br>树状数组也是用来维护区间信息的, 但是树状数组要比线段树易于实现很多.它的思路也是用一个大节点表示一些元素的信息,进行查询的时候只要对大节点进行查询就可以减少对树底层元素的访问次数.<br>下图来自OI Wiki<br><img src="https://oi-wiki.org/ds/images/fenwick1.png" alt="oiwiki"><br>八个实边的方框的方块是存入树状数组的8个数,对应到最上层的连续内存块<code>nums</code>(小表从1开始), 他们上面参差不齐的生涯的方块就代表树状数组的区间信息大节点<code>cn</code>. 显然可以看出与<code>c2</code>关联的是<code>nums[1] + num[2]</code>,与<code>c6</code>关联的是<code>nums[5] + nums[6]</code>, 而<code>c8</code>维护着全局的区间信息.<br>有了树状数组,我们可以查询[1,val]之间的整数数量, 对于nums[i]而言, 我们先查询[1, 2*nums[i]]之间的整数数量, 再求出[1, maxvalue]之间的数量, 二者相减就是以i为右端点的翻转对的数量.</p>
+<details>
+  <summary>点击查看代码</summary>
+​```C++
+class BIT
+{
+private:
+    vector<int> tree;
+    int n;
+public:
+    BIT(int n): n(n), tree(n+1){}
+    static constexpr int lowbit(int x) {return x & (-x);}
+    void update(int x, int d)
+    {
+        while(x <= n)
+        {
+            tree[x] += d;
+            x += lowbit(x);
+        }
+    }
+
+<pre><code>int query(int x) const 
+&#123;
+    int ans = 0;
+    while(x)
+    &#123;
+        ans += tree[x];
+        x -= lowbit(x);
+    &#125;
+    return ans;
+&#125;
+</code></pre>
+<p>};</p>
+<p>class Solution {<br>public:<br>    int reversePairs(vector<int>&amp; nums) {<br>        set<long long> allNUmbers;<br>        for(int x: nums)<br>        {<br>            allNUmbers.insert(x);<br>            allNUmbers.insert((long long)x*2);<br>        }<br>        // 利用哈希表进行离散化<br>        unordered_map&lt;long long, int&gt; values;<br>        int idx = 0;<br>        for(long long x:allNUmbers) values[x] = ++idx;</p>
+<pre><code>    int ret = 0;
+    BIT bit(values.size());
+    for(int i =0; i &lt; nums.size(); i++)
+    &#123;
+        int left = values[(long long)nums[i] * 2], right = values.size();
+        ret += bit.query(right) - bit.query(left);
+        bit.update(values[nums[i]], 1);
+    &#125;
+    return ret;
+&#125;
+</code></pre>
+<p>};</p>
+<p>void trimLeftTrailingSpaces(string &amp;input) {<br>    input.erase(input.begin(), find_if(input.begin(), input.end(), [](int ch) {<br>        return !isspace(ch);<br>    }));<br>}</p>
+<p>void trimRightTrailingSpaces(string &amp;input) {<br>    input.erase(find_if(input.rbegin(), input.rend(), [](int ch) {<br>        return !isspace(ch);<br>    }).base(), input.end());<br>}</p>
+<p>vector<int> stringToIntegerVector(string input) {<br>    vector<int> output;<br>    trimLeftTrailingSpaces(input);<br>    trimRightTrailingSpaces(input);<br>    input = input.substr(1, input.length() - 2);<br>    stringstream ss;<br>    ss.str(input);<br>    string item;<br>    char delim = ‘,’;<br>    while (getline(ss, item, delim)) {<br>        output.push_back(stoi(item));<br>    }<br>    return output;<br>}</p>
+<p>int main() {<br>    string line;<br>    while (getline(cin, line)) {<br>        vector<int> nums = stringToIntegerVector(line);</p>
+<pre><code>    int ret = Solution().reversePairs(nums);
+
+    string out = to_string(ret);
+    cout &lt;&lt; out &lt;&lt; endl;
+&#125;
+return 0;
+</code></pre>
+<p>}</p>
+<p>```</p>
+</details>
+## 区间类题目的其他解法
+对于这类区间信息维护的题即便了解上面两种数据结构其实也是可以做的, 方法是通过归并(或者更直接说是写一个归并排序)的同时自底向上计算区间信息, 然后对区间信息做加减法, 不过这种方法也仅仅比暴力每次计算区间信息要好一些而已, 如果要追求更高效的算法还是免不了要了解几种树.
+<img src="https://docs.google.com/drawings/d/e/2PACX-1vTZ0_26anaHr0gYiob9nPq8ylkHPN_tE3jsPGVFB-wPWz8Hvek8P_AHW7plaQFe501xo1VeIrhZLN1t/pub?w=960&amp;h=720">
+
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p>[1]<a target="_blank" rel="noopener" href="https://blog.csdn.net/zearot/article/details/52280189">https://blog.csdn.net/zearot/article/details/52280189</a><br>[2]<a target="_blank" rel="noopener" href="https://zxi.mytechroad.com/blog/data-structure/307-range-sum-query-mutable/">https://zxi.mytechroad.com/blog/data-structure/307-range-sum-query-mutable/</a><br>[3]<a target="_blank" rel="noopener" href="https://oi-wiki.org/ds/fenwick/">https://oi-wiki.org/ds/fenwick/</a></p>
+
+      
+    </div>
+    
+    
+    
+  </div>
+</article>
+
+
+
+  
+    <article id="post-2020-03-05" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="name">
+      <a href="/2020/03/05/2020-03-05/">[LeetCode] 994.腐烂的橘子</a>
+      
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-03-05T21:22:22.000Z" itemprop="datePublished">2020-03-05</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <h2 id="题目内容"><a href="#题目内容" class="headerlink" title="题目内容"></a>题目内容</h2><p>在给定的网格中，每个单元格可以有以下三个值之一：</p>
+<p>值 0 代表空单元格；<br>值 1 代表新鲜橘子；<br>值 2 代表腐烂的橘子。<br>每分钟，任何与腐烂的橘子（在 4 个正方向上）相邻的新鲜橘子都会腐烂。</p>
+<p>返回直到单元格中没有新鲜橘子为止所必须经过的最小分钟数。如果不可能，返回 -1。 </p>
+<p>示例 1：</p>
+<p><img src="https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2019/02/16/oranges.png"> </p>
+<p>输入：<code>[[2,1,1],[1,1,0],[0,1,1]]</code><br>输出：4<br>示例 2：</p>
+<p>输入：<code>[[2,1,1],[0,1,1],[1,0,1]]</code><br>输出：-1<br>解释：左下角的橘子（第 2 行， 第 0 列）永远不会腐烂，因为腐烂只会发生在 4 个正向上。<br>示例 3：</p>
+<p>输入：<code>[[0,2]]</code><br>输出：0<br>解释：因为 0 分钟时已经没有新鲜橘子了，所以答案就是 0 。</p>
+<p><em>提示：</em></p>
+<p><em>1 &lt;= grid.length &lt;= 10</em><br><em>1 &lt;= grid[0].length &lt;= 10</em><br><em>grid[i][j] 仅为 0、1 或 2</em></p>
+<p>来源：力扣（LeetCode）<br>链接：<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/rotting-oranges">https://leetcode-cn.com/problems/rotting-oranges</a><br>著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+<h2 id="解答"><a href="#解答" class="headerlink" title="解答"></a>解答</h2><p>BFS模板题。值得注意的是，这里BFS的起点是多个，因为箱子中一开始可能就有多个坏的橘子。</p>
+<p>代码如下</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 箱子中有可能一开始就有多个坏的橘子，所以0level的节点有多个</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAKE_E(x, y, z) (make_pair(x, make_pair(y, z)))</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; dir_x = &#123;<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">-1</span>&#125;;</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; dir_y = &#123;<span class="number">1</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">0</span>&#125;;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">bfs</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt; grid)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> bad_count = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> good_count = <span class="number">0</span>;</span><br><span class="line">        <span class="built_in">queue</span>&lt;<span class="built_in">pair</span>&lt;<span class="keyword">int</span>, <span class="built_in">pair</span>&lt;<span class="keyword">int</span>, <span class="keyword">int</span>&gt;&gt;&gt; q;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; grid.size(); i++) &#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; grid[<span class="number">0</span>].size(); j++)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span>(grid[i][j] == <span class="number">2</span>) &#123;</span><br><span class="line">                    q.push(MAKE_E(<span class="number">0</span>, i, j));</span><br><span class="line">                    bad_count++;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span>(grid[i][j] == <span class="number">1</span>) good_count++;</span><br><span class="line">                    </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> max_level = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(!q.empty()) &#123;</span><br><span class="line">            <span class="keyword">auto</span> p = q.front();</span><br><span class="line">            q.pop();</span><br><span class="line">            <span class="keyword">int</span> level = p.first;</span><br><span class="line">            <span class="keyword">int</span> _x = p.second.first;</span><br><span class="line">            <span class="keyword">int</span> _y = p.second.second;</span><br><span class="line">            max_level = max(level, level);</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i++) &#123;</span><br><span class="line">                <span class="keyword">int</span> x = _x + dir_x[i];</span><br><span class="line">                <span class="keyword">int</span> y = _y + dir_y[i];</span><br><span class="line">                <span class="keyword">if</span>(x &gt;= <span class="number">0</span> &amp;&amp; x &lt; grid.size() &amp;&amp; y &gt;=<span class="number">0</span> &amp;&amp; y &lt; grid[<span class="number">0</span>].size() &amp;&amp; grid[x][y] == <span class="number">1</span>) &#123;</span><br><span class="line">                    q.push(MAKE_E(level+<span class="number">1</span>, x, y));</span><br><span class="line">                    grid[x][y] = <span class="number">2</span>;</span><br><span class="line">                    good_count--;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> good_count == <span class="number">0</span> ? max_level : <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">orangesRotting</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt;&amp; grid)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> bfs(grid);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    
+    
+    
+  </div>
+</article>
+
+
+
+  
+    <article id="post-2019-02-26" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="name">
+      <a href="/2020/02/26/2019-02-26/"> [东拼西凑] AC自动机算法</a>
+      
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-02-26T01:17:51.000Z" itemprop="datePublished">2020-02-26</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>最近在看龙书<em>Compilers, Principles, Techniques, and Tools</em>，涉及到了一点关于字符串匹配/正则表达式/自动机理论的知识。在词法分析这一章节介绍了一个字符串匹配算法AC自动机，我觉得它理解起来并不是很难，只是一个过去算法的综合。所以尝试写一篇文章来介绍这个算法。顺便做一点coding练习。</p>
+<p>AC自动机算法「Aho-Corasick」是一个通过构建一个代表trie的finite-state machine的字符串/字典匹配算法。要介绍它离不开介绍一个更常见的算法KMP和一种字典数据结构trie树。</p>
+<h2 id="KMP算法"><a href="#KMP算法" class="headerlink" title="KMP算法"></a>KMP算法</h2><p>时间复杂度O(m+n) m for string length, n for pattern length</p>
+<p>说到从一个序列中匹配一个目标字符串，最简单的办法就是把序列中的每一个字符作为起点，向后试探是否能够与目标字符串匹配，一旦是不匹配就将起点向后移一位。</p>
+<img src="/Users/komoriii/Documents/GitHub/EvanMu96.github.io/public/images/problem1.png" style="zoom:50%;" />
+
+<p>这种最接近brute-force的算法，也可以用一个DFA来描述。如果每次读取的一个字符是pattern匹配的下一个字符，那么移动到下一个状态，但是每次都是回到0号状态，导致时间复杂度是O(mn)。</p>
+<p><img src="/images/bfsm.png"></p>
+<p>KMP算法要解决的问题就是，如何尽可能回退更少的状态。所以引入了一个映射叫做失效函数。根据pattern的特性，每一个pattern有着不同的失效函数。失效函数f(s)的目标是使得b1b2…bf(s)是最长的，既是b1b2…bs的真前缀，又是b1b2…bs的后缀子串。这样回退的状态就不再是一股脑地回退到0号状态，而是回退到号码是f(s)的状态。</p>
+<p>对于ababaaa 失效函数是这样构造的</p>
+<table>
+<thead>
+<tr>
+<th>s</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>f(s)</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<p>对于ababaaa的KMP版本的DFA是这样的</p>
+<p><img src="/images/kmpsm.png" alt="kmpsm"></p>
+<p>构造这样一个失效函数可以用如下的算法，找到每一个s对应的f(s)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;伪代码 仅用来描述算法</span><br><span class="line">&#x2F;&#x2F;pseudocode for s-&gt;f(s) generatiion</span><br><span class="line">b &#x3D; &quot;some string&quot;</span><br><span class="line">t &#x3D; 0;</span><br><span class="line">f[1] &#x3D; 0; &#x2F;&#x2F;</span><br><span class="line">for(s&#x3D;1; s&lt;n; s++)&#123;</span><br><span class="line">	while(t&gt;0&amp;&amp;b[s+1]! &#x3D; b[t+1]) t &#x3D; f(t);</span><br><span class="line">	if(b[s+1] &#x3D;&#x3D; b[t+1])&#123;</span><br><span class="line">		t&#x3D;t+1;</span><br><span class="line">		f[s+1]&#x3D;t;</span><br><span class="line">	&#125;</span><br><span class="line">	else f[s+1] &#x3D; 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Trie树"><a href="#Trie树" class="headerlink" title="Trie树"></a>Trie树</h2><p>Trie树也叫做前缀树。它是一种搜索树，但是与二分搜索树不同的是，它的key不保存在节点中，而是与这个节点在树中的位置直接相关的。</p>
+<p>比如一个存储了4个key的trie树是这样的。</p>
+<p><img src="/images/trie.png" alt="trie"></p>
+<h2 id="Aho-Corasick算法"><a href="#Aho-Corasick算法" class="headerlink" title="Aho-Corasick算法"></a>Aho-Corasick算法</h2><p>Aho「龙书的作者」和Corasick对KMP算法进行了推广，当我们知道一个pattern字典(a set of patterns)，这些pattern就可以组合成一个trie树。同时，由于KMP的失效函数的思想，在这样一个trie树的结构下就可以在不同的分支「即是不同的pattern」之间转移状态。</p>
+<p><img src="/images/acsm.png" alt="acsm"></p>
+<h2 id="算法实现"><a href="#算法实现" class="headerlink" title="算法实现"></a>算法实现</h2><p>实现Aho-Corasic算法首先要构建一个Trie树（如何实现一个Trie树可以参考维基百科的Trie词条或者LeetCode <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/implement-trie-prefix-tree/">https://leetcode-cn.com/problems/implement-trie-prefix-tree/</a> (这是LeetCode中国的链接，题号与国际版本相同)），然后修改节点添加失效函数，也就是匹配失效时候状态转移的轨迹。<br>下面的C++代码实现主要来自: <a target="_blank" rel="noopener" href="https://cp-algorithms.com/string/aho_corasick.html#toc-tgt-7">https://cp-algorithms.com/string/aho_corasick.html#toc-tgt-7</a> 我仅仅添加了一些注释和测试用例。  </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> K = <span class="number">26</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Vertex</span> &#123;</span></span><br><span class="line">    <span class="comment">// where to link</span></span><br><span class="line">    <span class="keyword">int</span> next[K];</span><br><span class="line">    <span class="comment">// is it the last character of a word</span></span><br><span class="line">    <span class="keyword">bool</span> leaf = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">int</span> p = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">char</span> pch;</span><br><span class="line">    <span class="keyword">int</span> link = <span class="number">-1</span>;</span><br><span class="line">    <span class="comment">// where to move buffer</span></span><br><span class="line">    <span class="keyword">int</span> go[K];</span><br><span class="line">    <span class="comment">// default parameters lead to a root</span></span><br><span class="line">    Vertex(<span class="keyword">int</span> p=<span class="number">-1</span>, <span class="keyword">char</span> ch=<span class="string">&#x27;$&#x27;</span>) : p(p), pch(ch) &#123;</span><br><span class="line">        <span class="comment">// initialized all direction into -1</span></span><br><span class="line">        fill(begin(next), end(next), <span class="number">-1</span>);</span><br><span class="line">        fill(begin(go), end(go), <span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="built_in">vector</span>&lt;Vertex&gt; <span class="title">t</span><span class="params">(<span class="number">1</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">add_string</span><span class="params">(<span class="built_in">string</span> <span class="keyword">const</span>&amp; s)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> v = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">char</span> ch : s) &#123;</span><br><span class="line">        <span class="keyword">int</span> c = ch - <span class="string">&#x27;a&#x27;</span>;</span><br><span class="line">        <span class="keyword">if</span> (t[v].next[c] == <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="comment">// append a new Vertex </span></span><br><span class="line">            t[v].next[c] = t.size();</span><br><span class="line">            t.emplace_back(v, ch);</span><br><span class="line">        &#125;</span><br><span class="line">        v = t[v].next[c];   </span><br><span class="line">    &#125;</span><br><span class="line">    t[v].leaf = <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">go</span><span class="params">(<span class="keyword">int</span> v, <span class="keyword">char</span> ch)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">get_link</span><span class="params">(<span class="keyword">int</span> v)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (t[v].link == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (v == <span class="number">0</span> || t[v].p == <span class="number">0</span>)</span><br><span class="line">            t[v].link = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="comment">// recursively find the parent and try again</span></span><br><span class="line">            <span class="comment">// until it reachs the root(v = 0)</span></span><br><span class="line">            t[v].link = go(get_link(t[v].p), t[v].pch);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> t[v].link;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">go</span><span class="params">(<span class="keyword">int</span> v, <span class="keyword">char</span> ch)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> c = ch - <span class="string">&#x27;a&#x27;</span>;</span><br><span class="line">    <span class="keyword">if</span> (t[v].go[c] == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (t[v].next[c] != <span class="number">-1</span>)</span><br><span class="line">            t[v].go[c] = t[v].next[c];</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="comment">// recursively find the parent and try again</span></span><br><span class="line">            <span class="comment">// until it reachs the root(v = 0)</span></span><br><span class="line">            t[v].go[c] = v == <span class="number">0</span> ? <span class="number">0</span> : go(get_link(v), ch);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> t[v].go[c];</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">traverse</span><span class="params">(<span class="built_in">string</span> <span class="keyword">const</span> &amp; obj)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> v = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; obj.size(); i++)</span><br><span class="line">    &#123; </span><br><span class="line">        v = go(v, obj[i]);</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; t[v].pch &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">        <span class="keyword">if</span>(t[v].leaf)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;OK&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    add_string(<span class="string">&quot;tas&quot;</span>);</span><br><span class="line">    add_string(<span class="string">&quot;app&quot;</span>);</span><br><span class="line">    add_string(<span class="string">&quot;ray&quot;</span>);</span><br><span class="line">    add_string(<span class="string">&quot;mac&quot;</span>);</span><br><span class="line">    traverse(<span class="string">&quot;taspratray&quot;</span>); <span class="comment">//t a s OK$ r a t r a y OK</span></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    traverse(<span class="string">&quot;fhduisufdasfdsaseh&quot;</span>); <span class="comment">//$ $ $ $ $ $ $ $ $ a $ $ $ $ a $ $ $ </span></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    traverse(<span class="string">&quot;fesafeasmacapp&quot;</span>); <span class="comment">//$ $ $ a $ $ a $ m a c OKa p p OK</span></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p>[1]Wikipedia <em>Trie Tree</em> <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Trie">https://en.wikipedia.org/wiki/Trie</a></p>
+<p>[2]<em>数据结构(C++语言版)</em> 邓俊辉 「第三版」</p>
+<p>[3]<em>Compilers, Principles, Techniques, and Tools 编译原理</em> Alfred V.Aho等 机械工业出版社<br>[3]cp-algorithms.com <a target="_blank" rel="noopener" href="https://cp-algorithms.com/string/aho_corasick.html#">https://cp-algorithms.com/string/aho_corasick.html#</a></p>
+
+      
+    </div>
+    
+    
+    
+  </div>
+</article>
+
+
+
+  
+    <article id="post-2020-02-15" class="article article-type-post" itemprop="blogPost" itemscope>
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h2 class="article-title" itemprop="name">
+      <a href="/2020/02/15/2020-02-15/">[编译原理学习笔记] 如何构建一个简单的分支预测语法分析器</a>
+      
+    </h2>
+  
+
+
+        <div class="article-meta">
+          <time class="article-date" datetime="2020-02-15T21:10:26.000Z" itemprop="datePublished">2020-02-15</time>
+
+          
+        </div>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+        <p>Recursive-descent parsing（递归下降分析方法）是一种top-down的语法分析方法。</p>
+<p>Predictive parsing（预测分析法）是递归下降分析方法的一种简单形式。在预测分析法中，各个非终结符号对应的过程中的control flow可以由lookahead符号<strong>无二义</strong>地确定。</p>
+<p>对类似C/Java的文法规则做一些归纳：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">stmt -&gt; expr;</span><br><span class="line">			| if(expr) stmt;</span><br><span class="line">			| for(optexpr; optexpr; optexpr) stmt</span><br><span class="line">			| other</span><br><span class="line">optexpr -&gt; ε </span><br><span class="line">			| expr</span><br></pre></td></tr></table></figure>
+
+<p>预测分析法对于一个stmt的lookahead会被初始化为一个非终结符号的第一个终结符号。比如for语句的第一个终结符号就是<code>for</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 终结符号类型 terminal</span><br><span class="line">void stmt() &#123;</span><br><span class="line">	switch(lookahead) &#123;</span><br><span class="line">		case expr:</span><br><span class="line">			match(expr);match(&#39;;&#39;);break;</span><br><span class="line">		case if:</span><br><span class="line">			match(if);match(&#39;(&#39;);match(expr);match(&#39;)&#39;);stmt();</span><br><span class="line">			break;</span><br><span class="line">		case for:</span><br><span class="line">			match(for);match(&#39;(&#39;);optexpr();match(&#39;;&#39;)optexpr</span><br><span class="line">	&#125;</span><br><span class="line">	case other:</span><br><span class="line">		match(other); break;</span><br><span class="line">	default:</span><br><span class="line">		&#x2F;&#x2F; raise an syntax error</span><br><span class="line">		break;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void optexpr() &#123;</span><br><span class="line">	if(lookahead &#x3D;&#x3D; expr) match(expr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void match(terminal t) &#123;</span><br><span class="line">	if(lookahead &#x3D;&#x3D; t) lookahead &#x3D; next_terminal;</span><br><span class="line">	else </span><br><span class="line">	&#x2F;&#x2F; raise an syntax error</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>构建这样的一个预测分析器，要对所有的非终结符定义一个处理的函数。比如上面的stmt和optexpr两个非终结符。</p>
+<p>对于非终结符的处理函数，要做下面两件事情</p>
+<ol>
+<li>检查lookahead符号，确定要选择哪一个产生式（用一个大switch/if…else if…else if…）</li>
+<li>对于每一个分支，模拟被选中的产生式的parse过程。</li>
+</ol>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>[1]编译原理(Compilers Principles, Techniques and Tools)， 机械工业出版社</p>
+
+      
+    </div>
+    
+    
+    
+  </div>
+</article>
+
+
+
+  
+
+
+  <nav id="page-nav" class="page-nav">
+    
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
+  </nav>
+
+
+
+    </div>
+  </div>
+  
+
+
+
+
+<div id="settings-container">
+  <div id="dark-mode">dark</div>
+  <div id="sans-font">sans</div>
+</div>
+<script type="text/javascript">
+let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
+</script>
+
+
+
+
+</body>
+</html>
