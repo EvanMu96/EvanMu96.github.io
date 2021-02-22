@@ -3,154 +3,182 @@
 <head>
   <meta charset="utf-8">
   
+  
   <title>Komoriii</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  
-  
-  
-<link rel="stylesheet" href="/css/style.css">
-
-  
-    
-<link rel="stylesheet" href="/css/highlight.css">
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta property="og:type" content="website">
 <meta property="og:title" content="Komoriii">
 <meta property="og:url" content="http://blog.senevan.com/index.html">
 <meta property="og:site_name" content="Komoriii">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="Komoriii">
-<meta name="twitter:card" content="summary"><meta name="generator" content="Hexo 5.4.0"></head>
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Komoriii" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
 
 <body>
-  <div id="wrapper">
-    <header id="header">
-  <h1 id="title">
-    <a href="/">Komoriii</a>
-  </h1>
-  <nav>
-    
-    
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Komoriii</a>
+      </h1>
       
-      <a class="nav-link" href="/">Home</a>
-    
-      
-        <span class="nav-spacer">×</span>
-      
-      <a class="nav-link" href="/archives">Archives</a>
-    
-      
-        <span class="nav-spacer">×</span>
-      
-      <a class="nav-link" href="/About-Me/">About</a>
-    
-    
-  </nav>
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/About-Me">About</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS 订阅"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://blog.senevan.com"></form>
+      </div>
+    </div>
+  </div>
 </header>
 
-    <div id="content">
-      
+      <div class="outer">
+        <section id="main">
   
-    <article id="post-2021-02-02" class="article article-type-post" itemprop="blogPost" itemscope>
+    <article id="post-2021-02-02" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/02/02/2021-02-02/" class="article-date">
+  <time class="dt-published" datetime="2021-02-02T08:57:41.000Z" itemprop="datePublished">2021-02-02</time>
+</a>
+    
+  </div>
   <div class="article-inner">
+    
     
       <header class="article-header">
         
   
-    <h2 class="article-title" itemprop="name">
-      <a href="/2021/02/02/2021-02-02/">[C++]实现std::move和std::forward</a>
-      
-    </h2>
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/02/02/2021-02-02/">[C++]实现std::move和std::forward</a>
+    </h1>
   
 
-
-        <div class="article-meta">
-          <time class="article-date" datetime="2021-02-02T08:57:41.000Z" itemprop="datePublished">2021-02-02</time>
-
-          
-        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+    <div class="e-content article-entry" itemprop="articleBody">
       
-      
-        <p>C++11的<code>std::move</code>我至少看过至少5遍不同的书以及cppreference说它和内存操作无关, 但是我自己的代码中很少会主动用到它所以偶尔用一次就出了UB.<br>所以我觉得自己对着标准库的代码写一下<code>std::move</code>, 以及顺便写一下<code>std::forward</code>. 无论如何, 以后打开博客就回想起, std::move的行为不是名字上写的move(物理)了.</p>
+        <p>尽管平时工作经常写C++，但是大多数对性能也没有敏感到用move和copy的结果是天上地下的情况。最近在工作中要改一个调用频繁的接口，于是用了一次 std::move，结果就写出问题了（我的C++知识在脑子里会发生LRU，稍微不用就容易忘）。在刚学C++的时候我至少看过至少3本不同的书，天天查的cppreference，都说它和内存操作无关。于是去翻一下源码自己实现一下加深其印象。</p>
 <h3 id="move"><a href="#move" class="headerlink" title="move"></a>move</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line"><span class="keyword">constexpr</span> <span class="keyword">typename</span> <span class="built_in">std</span>::remove_reference&lt;_Tp&gt;::type&amp;&amp; <span class="comment">//rvalue</span></span><br><span class="line">move(_Tp&amp;&amp; <span class="keyword">__t</span>)<span class="keyword">noexcept</span> <span class="comment">// argument is a universal reference</span></span><br><span class="line">&#123; <span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;<span class="keyword">typename</span> <span class="built_in">std</span>::remove_reference&lt;_Tp&gt;::type::type&amp;&amp;&gt;(<span class="keyword">__t</span>);&#125; <span class="comment">// convert to rvalue reference</span></span><br></pre></td></tr></table></figure>
-<p>总结一下就是它把一个对象转成rvalue reference, 不会destruct掉被Move过的对象,所以,在一个复合数据结构中把一个部分给move后不要留着已经被move的对象.</p>
-<h3 id="forward"><a href="#forward" class="headerlink" title="forward"></a>forward</h3><p><code>std::forward</code>是用来实现完美转发的函数, 同样它也是只依靠类型转换实现的.<br>Effective Modern C++ 有完整的一个篇文章<b><a target="_blank" rel="noopener" href="https://github.com/kelthuzadx/EffectiveModernCppChinese/blob/master/5.RRefMovSemPerfForw/item25.md">例子</a></b>来讲什么时候需要用<code>std::forward</code>, 尤其是函数的参数是一个universal reference时, 要正确的解决lvalue reference和rvalue reference传入这两种情况, 势必要使用<code>std::forward</code>, 如果这时断然地用<code>std::move</code>会导致传入的左值被move走而调用函数的人不自知的情况.</p>
+<p>总结一下就是它把一个对象转成右值 (rvalue) 引用, 不会destruct掉被Move过的对象,所以,在一个复合数据结构中把一个部分给 move 后不要留着已经被 move 的对象，记得析构/释放掉免得后面忘记导致再次使用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 忘记释放再次使用的情况</span><br><span class="line">vector&lt;int&gt; vec&#123;1,2,3,4&#125;;</span><br><span class="line">std::move(vec.begin(), vec.begin() + 1);</span><br><span class="line"></span><br><span class="line">for(auto &amp;&amp; n: vec) std::cout &lt;&lt; n; &#x2F;&#x2F; this is bad</span><br></pre></td></tr></table></figure>
+
+<h3 id="forward"><a href="#forward" class="headerlink" title="forward"></a>forward</h3><p>std::forward 是用来实现完美转发的函数, 同样它也是只依靠类型转换实现的。<br><i>Effective Modern C++</i> 有完整的一个篇文章<b><a target="_blank" rel="noopener" href="https://github.com/kelthuzadx/EffectiveModernCppChinese/blob/master/5.RRefMovSemPerfForw/item25.md">例子</a></b>来讲什么时候需要用 std::forward ，尤其是函数的参数是一个 universal reference 时, 要正确的解决传入左值引用和传入右值引用两种情况。如果不想手动实现两个版本的话一定要使用 std::forward，如果这时断然地用std::move会导致传入的左值，在没有被察觉的情况下被move掉，如果函数外这个变量再被使用就出问题了。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line"><span class="keyword">constexpr</span> _Tp&amp;&amp;</span><br><span class="line">forward(<span class="keyword">typename</span> <span class="built_in">std</span>::remove_reference&lt;_Tp&gt;::type&amp; <span class="keyword">__t</span>) <span class="keyword">noexcept</span> <span class="comment">// lvalue reference</span></span><br><span class="line">&#123; <span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;_Tp&amp;&amp;&gt;(<span class="keyword">__t</span>);&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line"><span class="keyword">constexpr</span> _Tp&amp;&amp;</span><br><span class="line">forward(<span class="keyword">typename</span> <span class="built_in">std</span>::remove_reference&lt;_Tp&gt;::type&amp;&amp; <span class="keyword">__t</span>) <span class="keyword">noexcept</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">static_assert</span>(!<span class="built_in">std</span>::is_lvalue_reference&lt;_Tp&gt;::value);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;_Tp&amp;&amp;&gt;(<span class="keyword">__t</span>);</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
       
     </div>
-    
-    
-    
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2021/02/02/2021-02-02/" data-id="cklgtd0en000i4inb2l6ue0ue" data-title="[C++]实现std::move和std::forward" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
   </div>
+  
 </article>
 
 
 
   
-    <article id="post-2021-01-02" class="article article-type-post" itemprop="blogPost" itemscope>
+    <article id="post-2021-01-02" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/01/05/2021-01-02/" class="article-date">
+  <time class="dt-published" datetime="2021-01-04T16:08:40.000Z" itemprop="datePublished">2021-01-05</time>
+</a>
+    
+  </div>
   <div class="article-inner">
+    
     
       <header class="article-header">
         
   
-    <h2 class="article-title" itemprop="name">
-      <a href="/2021/01/05/2021-01-02/">[南来北往]京沪卧铺动车乘坐体验</a>
-      
-    </h2>
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/01/05/2021-01-02/">[南来北往]京沪卧铺动车乘坐体验</a>
+    </h1>
   
 
-
-        <div class="article-meta">
-          <time class="article-date" datetime="2021-01-04T16:08:40.000Z" itemprop="datePublished">2021-01-05</time>
-
-          
-        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+    <div class="e-content article-entry" itemprop="articleBody">
       
-      
-        <p>12月份体验了一次从上海出发到北京的动车卧铺.买这趟车的最主要的原因是当周的机票已经非常贵了,来回的动卧的价格就算是一等车厢也只需要1000元左右.坐这趟车的不到3周前浦东是有确诊的新冠病例的,也是我行程推迟,买不到价格合适的机票的原因.</p>
-<p>本来我是觉得动卧能省下一晚的住宿费的,然而当我开始想睡的时候问题来了,除非是睡眠质量非常非常好的人,就算不考虑噪音也是很难在这种晃晃悠悠的车厢空间内安然入睡的.所以如果你们和我一样对睡眠环境有一丁点的要求,买动卧的时候也要做好难以入睡的准备.</p>
+        <p>12月份去北京找女朋友体验了一次从上海出发到北京的动车卧铺。买这趟车的最主要的原因是急着去，其一是这个时间点想买到当周周末的飞机票只能买全价票，其二是我真的不像坐接近6个小时从上海到北京。</p>
+<p>在上车前，我是觉得动卧路上睡一觉能省下一晚的住宿费的，然而当我开始想睡的时候问题来了：除非是睡眠质量非常非常好的人，就算不考虑噪音也是很难在这种晃晃悠悠的车厢空间内安然入睡的，在去北京的路上我全程戴着降噪耳机，尽管如此也被吵醒了好多次。所以如果你们和我一样对睡眠环境有一丁点的要求，最好还是不要选择买动卧。</p>
 <p>如果下次能够买到1400元左右的飞机票我觉得我是不会买动卧的了.最后上两张自己拍的照片吧.<br><img src="/images/IMG_5619.jpeg" alt="train"><br><img src="/images/IMG_5620.jpeg" alt="cabin"></p>
 
       
     </div>
-    
-    
-    
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2021/01/05/2021-01-02/" data-id="cklgtd0em000h4inb707cd93m" data-title="[南来北往]京沪卧铺动车乘坐体验" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
   </div>
+  
 </article>
 
 
 
   
-    <article id="post-2020-01-01" class="article article-type-post" itemprop="blogPost" itemscope>
+    <article id="post-2020-01-01" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/01/05/2020-01-01/" class="article-date">
+  <time class="dt-published" datetime="2021-01-04T16:00:45.000Z" itemprop="datePublished">2021-01-05</time>
+</a>
+    
+  </div>
   <div class="article-inner">
+    
     
       <header class="article-header">
         
   
-    <h2 class="article-title" itemprop="name">
-      <a href="/2021/01/05/2020-01-01/">[最近的日常]2020年末装机杂记</a>
-      
-    </h2>
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/01/05/2020-01-01/">[最近的日常]2020年末装机杂记</a>
+    </h1>
   
 
-
-        <div class="article-meta">
-          <time class="article-date" datetime="2021-01-04T16:00:45.000Z" itemprop="datePublished">2021-01-05</time>
-
-          
-        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
-      
+    <div class="e-content article-entry" itemprop="articleBody">
       
         <p>先上配置</p>
 <ul>
@@ -162,52 +190,55 @@
 </ul>
 <p>我的需求</p>
 <ul>
-<li>个人编程开发 有Windows环境方便开发游戏的同时有剩余的性能开虚拟机 50%</li>
+<li>个人编程开发 有Windows环境方便学习游戏引擎，同时有剩余的性能开虚拟机跑点服务 50%</li>
 <li>2020前后2年的新游戏能够流畅游玩 50%</li>
 </ul>
 <p>总共的成本落在了6500块,加上手残自己没点亮又没时间就找了装机师傅又花了120块人工费.</p>
 <p>这样一来我也顺便对手里所有的电子设备做一个功能划分和生命周期估算,毕竟最近突然多了一个十万块的预期支出.</p>
 <ul>
-<li>iPhone XR  收消息,等编译的时间摸鱼 计划在2021年冬天换成新一代的苹果的budget iPhone</li>
+<li>iPhone XR  收消息，等编译的时间摸鱼 计划在2021年冬天换成新一代的苹果的budget iPhone</li>
 <li>MacBook Pro 2018 移动办公/非系统级的应用开发 计划在2022年换成 Apple Silicon的ARM版Air</li>
-<li>组装台式机 主力开发,虚拟机,第二游戏平台 根据必要性进行扩展</li>
-<li>PS4 slim 第一游戏平台,独占游戏 PS5 如无非常非常想玩的独占,第一个周期内更新时购买更新款</li>
-<li>潜在的支出: 群晖NAS 这玩意儿甚至我在京东上曾经下单过,虽然下单不到半天就冷静推掉了.优先级较低, 暂时通过稳定的网络服务以及购买付费的同步服务避免自己维护</li>
+<li>组装台式机 主力开发，虚拟机，第二游戏平台 根据必要性进行扩展</li>
+<li>PS4 slim 主要的玩游戏游戏平台。不过暂时还不着急买PS5，因为没有特别想玩的PS5独占，出Pro版或者出其他升级版之后考虑买升级版</li>
+<li>潜在的支出：群晖NAS 这玩意儿甚至我在京东上曾经下单过，但是下单不到半天就冷静推掉了。对我来说它优先级较低，暂时通过稳定的网络服务比如 iCloud 以及购买付费的同步服务避免自己维护</li>
 </ul>
 
       
     </div>
-    
-    
-    
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2021/01/05/2020-01-01/" data-id="cklgtd0ed00074inb0ob9afjn" data-title="[最近的日常]2020年末装机杂记" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
   </div>
+  
 </article>
 
 
 
   
-    <article id="post-2020-11-24" class="article article-type-post" itemprop="blogPost" itemscope>
+    <article id="post-2020-11-24" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/11/23/2020-11-24/" class="article-date">
+  <time class="dt-published" datetime="2020-11-22T16:36:13.000Z" itemprop="datePublished">2020-11-23</time>
+</a>
+    
+  </div>
   <div class="article-inner">
+    
     
       <header class="article-header">
         
   
-    <h2 class="article-title" itemprop="name">
-      <a href="/2020/11/23/2020-11-24/">[我的推荐列表]动画推荐列表</a>
-      
-    </h2>
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/11/23/2020-11-24/">[我的推荐列表]动画推荐列表</a>
+    </h1>
   
 
-
-        <div class="article-meta">
-          <time class="article-date" datetime="2020-11-22T16:36:13.000Z" itemprop="datePublished">2020-11-23</time>
-
-          
-        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
-      
+    <div class="e-content article-entry" itemprop="articleBody">
       
         <p>这个POST用来记录我比较推荐的动画列表.<br>用blog记录喜欢的动画的想法启发自 <a target="_blank" rel="noopener" href="https://imtwice.cn/twices-anime-list/">https://imtwice.cn/twices-anime-list/</a> .</p>
 <p>Tier 1</p>
@@ -246,37 +277,40 @@
 
       
     </div>
-    
-    
-    
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2020/11/23/2020-11-24/" data-id="cklgtd0el000g4inb1z0mhzuf" data-title="[我的推荐列表]动画推荐列表" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
   </div>
+  
 </article>
 
 
 
   
-    <article id="post-2020-11-23" class="article article-type-post" itemprop="blogPost" itemscope>
+    <article id="post-2020-11-23" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/11/22/2020-11-23/" class="article-date">
+  <time class="dt-published" datetime="2020-11-22T15:47:32.000Z" itemprop="datePublished">2020-11-22</time>
+</a>
+    
+  </div>
   <div class="article-inner">
+    
     
       <header class="article-header">
         
   
-    <h2 class="article-title" itemprop="name">
-      <a href="/2020/11/22/2020-11-23/">[文章备份][转载]如何排解政治性抑郁</a>
-      
-    </h2>
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/11/22/2020-11-23/">[文章备份][转载]如何排解政治性抑郁</a>
+    </h1>
   
 
-
-        <div class="article-meta">
-          <time class="article-date" datetime="2020-11-22T15:47:32.000Z" itemprop="datePublished">2020-11-22</time>
-
-          
-        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
-      
+    <div class="e-content article-entry" itemprop="articleBody">
       
         <p>原文作者: 邓艾艾艾<br>原文发布于: 微信公众号「雪豹樱桃」</p>
 <p>如何排解政治性抑郁，这是我被问过次数最多的一个问题。</p>
@@ -293,37 +327,40 @@
 
       
     </div>
-    
-    
-    
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2020/11/22/2020-11-23/" data-id="cklgtd0el000f4inbfnogb86a" data-title="[文章备份][转载]如何排解政治性抑郁" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
   </div>
+  
 </article>
 
 
 
   
-    <article id="post-2020-08-16" class="article article-type-post" itemprop="blogPost" itemscope>
+    <article id="post-2020-08-16" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/08/16/2020-08-16/" class="article-date">
+  <time class="dt-published" datetime="2020-08-16T11:20:24.000Z" itemprop="datePublished">2020-08-16</time>
+</a>
+    
+  </div>
   <div class="article-inner">
+    
     
       <header class="article-header">
         
   
-    <h2 class="article-title" itemprop="name">
-      <a href="/2020/08/16/2020-08-16/">[最近的日常]成为了游戏服务器程序员</a>
-      
-    </h2>
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/08/16/2020-08-16/">[最近的日常]成为了游戏服务器程序员</a>
+    </h1>
   
 
-
-        <div class="article-meta">
-          <time class="article-date" datetime="2020-08-16T11:20:24.000Z" itemprop="datePublished">2020-08-16</time>
-
-          
-        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
-      
+    <div class="e-content article-entry" itemprop="articleBody">
       
         <h2 id="最近在干什么"><a href="#最近在干什么" class="headerlink" title="最近在干什么"></a>最近在干什么</h2><p>距离上一篇博客的发布日期已经过去好久了，中间我也想过要不要写点东西发出来。工作之后学到一些东西，但是又没时间梳理语言。还是尽可能的写点东西锻炼一下自己的表达能力。</p>
 <p>今年4月初正式去了一家规模还算可以的游戏公司入职，入职之后看了三套网络游戏的服务器代码，其中一套是现在自己仍然在维护的一个线上项目，也就是我现在上班的日常工作。</p>
@@ -339,37 +376,40 @@
 
       
     </div>
-    
-    
-    
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2020/08/16/2020-08-16/" data-id="cklgtd0ek000e4inb1vm01v8g" data-title="[最近的日常]成为了游戏服务器程序员" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
   </div>
+  
 </article>
 
 
 
   
-    <article id="post-2020-03-25" class="article article-type-post" itemprop="blogPost" itemscope>
+    <article id="post-2020-03-25" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/03/25/2020-03-25/" class="article-date">
+  <time class="dt-published" datetime="2020-03-24T16:22:56.000Z" itemprop="datePublished">2020-03-25</time>
+</a>
+    
+  </div>
   <div class="article-inner">
+    
     
       <header class="article-header">
         
   
-    <h2 class="article-title" itemprop="name">
-      <a href="/2020/03/25/2020-03-25/">[LeetCode] 数组的区间信息类型题目</a>
-      
-    </h2>
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/03/25/2020-03-25/">[LeetCode] 数组的区间信息类型题目</a>
+    </h1>
   
 
-
-        <div class="article-meta">
-          <time class="article-date" datetime="2020-03-24T16:22:56.000Z" itemprop="datePublished">2020-03-25</time>
-
-          
-        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
-      
+    <div class="e-content article-entry" itemprop="articleBody">
       
         <p>之前在知乎上看到有算法竞赛经历的同学曾经提到过「线段树」「树状数组」这两种特殊的树型数据结构, 后来19年找工作前在leetcode上联系发现每次遇到维护区间信息的题目的时候有可以用到这几种数据结构,因此随手记两道典型的题目用于备忘.</p>
 <h2 id="线段树-307-Range-Sum-Query-Mutable"><a href="#线段树-307-Range-Sum-Query-Mutable" class="headerlink" title="线段树: 307. Range Sum Query - Mutable"></a>线段树: 307. Range Sum Query - Mutable</h2><h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>给定一个整数数组  nums，求出数组从索引 i 到 j  (i ≤ j) 范围内元素的总和，包含 i,  j 两点。</p>
@@ -464,37 +504,40 @@ return 0;
 
       
     </div>
-    
-    
-    
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2020/03/25/2020-03-25/" data-id="cklgtd0ej000d4inb3yrqd5hp" data-title="[LeetCode] 数组的区间信息类型题目" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
   </div>
+  
 </article>
 
 
 
   
-    <article id="post-2020-03-05" class="article article-type-post" itemprop="blogPost" itemscope>
+    <article id="post-2020-03-05" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/03/05/2020-03-05/" class="article-date">
+  <time class="dt-published" datetime="2020-03-05T13:22:22.000Z" itemprop="datePublished">2020-03-05</time>
+</a>
+    
+  </div>
   <div class="article-inner">
+    
     
       <header class="article-header">
         
   
-    <h2 class="article-title" itemprop="name">
-      <a href="/2020/03/05/2020-03-05/">[LeetCode] 994.腐烂的橘子</a>
-      
-    </h2>
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/03/05/2020-03-05/">[LeetCode] 994.腐烂的橘子</a>
+    </h1>
   
 
-
-        <div class="article-meta">
-          <time class="article-date" datetime="2020-03-05T13:22:22.000Z" itemprop="datePublished">2020-03-05</time>
-
-          
-        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
-      
+    <div class="e-content article-entry" itemprop="articleBody">
       
         <h2 id="题目内容"><a href="#题目内容" class="headerlink" title="题目内容"></a>题目内容</h2><p>在给定的网格中，每个单元格可以有以下三个值之一：</p>
 <p>值 0 代表空单元格；<br>值 1 代表新鲜橘子；<br>值 2 代表腐烂的橘子。<br>每分钟，任何与腐烂的橘子（在 4 个正方向上）相邻的新鲜橘子都会腐烂。</p>
@@ -514,37 +557,40 @@ return 0;
 
       
     </div>
-    
-    
-    
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2020/03/05/2020-03-05/" data-id="cklgtd0ei000c4inb1qog239o" data-title="[LeetCode] 994.腐烂的橘子" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
   </div>
+  
 </article>
 
 
 
   
-    <article id="post-2019-02-26" class="article article-type-post" itemprop="blogPost" itemscope>
+    <article id="post-2019-02-26" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/02/26/2019-02-26/" class="article-date">
+  <time class="dt-published" datetime="2020-02-25T17:17:51.000Z" itemprop="datePublished">2020-02-26</time>
+</a>
+    
+  </div>
   <div class="article-inner">
+    
     
       <header class="article-header">
         
   
-    <h2 class="article-title" itemprop="name">
-      <a href="/2020/02/26/2019-02-26/"> [东拼西凑] AC自动机算法</a>
-      
-    </h2>
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/02/26/2019-02-26/"> [东拼西凑] AC自动机算法</a>
+    </h1>
   
 
-
-        <div class="article-meta">
-          <time class="article-date" datetime="2020-02-25T17:17:51.000Z" itemprop="datePublished">2020-02-26</time>
-
-          
-        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
-      
+    <div class="e-content article-entry" itemprop="articleBody">
       
         <p>最近在看龙书<em>Compilers, Principles, Techniques, and Tools</em>，涉及到了一点关于字符串匹配/正则表达式/自动机理论的知识。在词法分析这一章节介绍了一个字符串匹配算法AC自动机，我觉得它理解起来并不是很难，只是一个过去算法的综合。所以尝试写一篇文章来介绍这个算法。顺便做一点coding练习。</p>
 <p>AC自动机算法「Aho-Corasick」是一个通过构建一个代表trie的finite-state machine的字符串/字典匹配算法。要介绍它离不开介绍一个更常见的算法KMP和一种字典数据结构trie树。</p>
@@ -598,37 +644,40 @@ return 0;
 
       
     </div>
-    
-    
-    
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2020/02/26/2019-02-26/" data-id="cklgtd0ec00064inb35c76tla" data-title=" [东拼西凑] AC自动机算法" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
   </div>
+  
 </article>
 
 
 
   
-    <article id="post-2020-02-15" class="article article-type-post" itemprop="blogPost" itemscope>
+    <article id="post-2020-02-15" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/02/15/2020-02-15/" class="article-date">
+  <time class="dt-published" datetime="2020-02-15T13:10:26.000Z" itemprop="datePublished">2020-02-15</time>
+</a>
+    
+  </div>
   <div class="article-inner">
+    
     
       <header class="article-header">
         
   
-    <h2 class="article-title" itemprop="name">
-      <a href="/2020/02/15/2020-02-15/">[编译原理学习笔记] 如何构建一个简单的分支预测语法分析器</a>
-      
-    </h2>
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/02/15/2020-02-15/">[编译原理学习笔记] 如何构建一个简单的分支预测语法分析器</a>
+    </h1>
   
 
-
-        <div class="article-meta">
-          <time class="article-date" datetime="2020-02-15T13:10:26.000Z" itemprop="datePublished">2020-02-15</time>
-
-          
-        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
-      
+    <div class="e-content article-entry" itemprop="articleBody">
       
         <p>Recursive-descent parsing（递归下降分析方法）是一种top-down的语法分析方法。</p>
 <p>Predictive parsing（预测分析法）是递归下降分析方法的一种简单形式。在预测分析法中，各个非终结符号对应的过程中的control flow可以由lookahead符号<strong>无二义</strong>地确定。</p>
@@ -648,10 +697,14 @@ return 0;
 
       
     </div>
-    
-    
-    
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2020/02/15/2020-02-15/" data-id="cklgtd0ei000b4inb4pc72chn" data-title="[编译原理学习笔记] 如何构建一个简单的分支预测语法分析器" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
   </div>
+  
 </article>
 
 
@@ -659,30 +712,107 @@ return 0;
   
 
 
-  <nav id="page-nav" class="page-nav">
+  <nav id="page-nav">
     
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">下一页 &raquo;</a>
   </nav>
 
+</section>
+        
+          <aside id="sidebar">
+  
+    
 
+  
+    
 
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">二月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li></ul>
     </div>
   </div>
+
+
   
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2021/02/02/2021-02-02/">[C++]实现std::move和std::forward</a>
+          </li>
+        
+          <li>
+            <a href="/2021/01/05/2021-01-02/">[南来北往]京沪卧铺动车乘坐体验</a>
+          </li>
+        
+          <li>
+            <a href="/2021/01/05/2020-01-01/">[最近的日常]2020年末装机杂记</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/23/2020-11-24/">[我的推荐列表]动画推荐列表</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/22/2020-11-23/">[文章备份][转载]如何排解政治性抑郁</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2021 Komoriii<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/About-Me" class="mobile-nav-link">About</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
 
 
 
 
-<div id="settings-container">
-  <div id="dark-mode">dark</div>
-  <div id="sans-font">sans</div>
-</div>
-<script type="text/javascript">
-let d=document,r=d.documentElement.style,f=r.setProperty.bind(r),l=localStorage,s=l.getItem('s')||(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),n=l.getItem('n'),m=d.getElementById("dark-mode"),b=()=>{f('--bg-color','#fafafa');f('--code-bg-color','#f4f4f4');f('--text-color','#212121');f('--secondary-color','#808080');f('--tertiary-color','#b0b0b0');f('--link-color','#b5c8cf');f('--link-hover-color','#618794');f('--link-bg-color','#dae4e7');f('--selection-color','#dae4e7');m.innerHTML="dark"},c=()=>{f('--bg-color','#212121');f('--code-bg-color','#292929');f('--text-color','#fff');f('--secondary-color','#c0c0c0');f('--tertiary-color','#6e6e6e');f('--link-color','#4d6b75');f('--link-hover-color','#96b1bb');f('--link-bg-color','#5d828e');f('--selection-color','#acc1c9');m.innerHTML="light"},o=d.getElementById("sans-font"),e=()=>{f('--body-stack','"Lora", "Georgia", "Times New Roman", serif');o.innerHTML="sans"},g=()=>{f('--body-stack','"Lato", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "Verdana", sans-serif');o.innerHTML="serif"};m.onclick=()=>{if(s==2){s=1;l.setItem('s',s);c()}else{s=2;l.setItem('s',s);b()}};o.onclick=()=>{if(n==2){n=1;l.setItem('n',n);g()}else{n=2;l.setItem('n',n);e()}};if(!s){s=2;l.setItem('s',2)};if(s==1){c()};if(!n){n=2;l.setItem('n',2)};if(n==1){g()};
-</script>
+<script src="/js/script.js"></script>
 
 
 
 
+
+  </div>
 </body>
 </html>
