@@ -105,7 +105,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/02/08/2020-02-08/" data-id="cklgtd0eg000a4inbfl6d3jwj" data-title="[最近的日常] vol.0" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/02/08/2020-02-08/" data-id="cklhq789n00094hoo82zy6fsa" data-title="[最近的日常] vol.0" class="article-share-link">分享</a>
       
       
       
@@ -166,75 +166,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/01/26/2020-01-26/" data-id="cklgtd0ef00094inb0bjgehbj" data-title="[LeetCode] 779. 第K个语法符号" class="article-share-link">分享</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-2020-01-10" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2020/01/10/2020-01-10/" class="article-date">
-  <time class="dt-published" datetime="2020-01-09T16:17:39.000Z" itemprop="datePublished">2020-01-10</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2020/01/10/2020-01-10/">[消费电子] Apple的T2芯片究竟是做什么的</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>我的第一台苹果电脑是2011款的macbook pro，这台电脑当时的屏幕素质完全震撼了当时在上高中的我。在这台mbp2011之前，我用的是一款acer的14寸塑料壳笔记本，用来玩会声会影剪辑视频实在是勉勉强强。<br>2018年，我来到香港读书。由于学校和信港电脑合作有价格实惠的macbook学生机，我再次换掉手上的win10笔记本把主力笔记本切换到了苹果的macbook pro 2018款。我拿到手之后发现，新的mac多了一个coprocessor，它的名字叫做T2 security chip，是一块。如果我没猜错的话，这枚coprocessor是用来加强加密功能提升系统安全性的。之前我对类似的全盘加密机制也不怎么了解，买过的windows笔记本也从来没有TPM，因此去翻了一下T2的技术手册对照着自己学过一个学期的密码学只是梳理一下。</p>
-<h1 id="大纲"><a href="#大纲" class="headerlink" title="大纲"></a>大纲</h1><ul>
-<li>Apple T系列芯片的历史</li>
-<li>T2芯片用于File System加密</li>
-<li>T2芯片用于系统Secure Boot</li>
-<li>T2芯片用于touch-id指纹认证</li>
-<li>T2芯片用于保护麦克风使用权限</li>
-<li>Reference</li>
-</ul>
-<h1 id="Apple-T系列的历史"><a href="#Apple-T系列的历史" class="headerlink" title="Apple T系列的历史"></a>Apple T系列的历史</h1><p>在现代的计算机加密方法中，非常常用的一种加密方法是对整个硬盘做加密。对加密的实现可以用执行在CPU上的内核级程序也可以使用一个独立单一功能的硬件完成。相对于使用软件方法，独立的加密芯片硬件有着得天独厚的优势。首先，独立的硬件保证了未经加密的raw data不会进入cpu中，确保了骇客不可以hack进系统内核态读取未经加密过的数据。其次，因为CPU不再负责加密，独立芯片的方案在IO和CPU利用里上有了比较明显的效率提升。以当前2020年来讲，现代的操作系统都会提供独立加密芯片的支持。比如Windows操作系统的Bitlocker，可以搭配TPM硬件完成这项功能。而mac的这项功能由FireVault软件和T系列的芯片提供。</p>
-<p>Apple从搭载touchbar的第一代macbook pro开始就使用了T1这枚ARMv7的SoC，主要用于运行touchbar的bridgeOS，并独立负责touch id指纹hash的存储，以及保护mic不会被黑客劫持。而在2017年的iMac Pro上，Apple开始推广自己的T系列加密芯片的第二代。这一次，大容量的SSD的加密也将交给专门为AES encryption/decryption设计过的64bit ARMv8芯片。无论是功能的多寡还是性能，T2在纯粹的性能上可谓是远远超过了它的前辈。也顺理成章地将FireVault加密与解密的运算职责挪到了T这块coprocessor上。</p>
-<h1 id="T2芯片用于File-System加密"><a href="#T2芯片用于File-System加密" class="headerlink" title="T2芯片用于File System加密"></a>T2芯片用于File System加密</h1><p>![image-20200113211150372](/images/Screenshot 2020-02-12 at 12.53.06 AM.png)</p>
-<p>Apple T2芯片使用DMA path访问SSD和内存。而在加密方式上，T2内部的专为AES加密算法设计的AES Cypto Engine。AES算法是一种block cipher，其加密方式是将数据分成固定的块一块一块（block）做对称加密操作。这里提到了一个术语叫做对称加密，既然有对称加密，那肯定也有非对称加密，这里我们暂且不展开讲非对称加密的原理。只说一个key point就是非对称加密在数学原理上使用的是one-way function。这种函数易于正向计算而在数据规模很复杂的情况下不容易反向推出原始数据，加密和解密也并非是互逆的操作。而对称加密不同，加密和解密是完全互逆的操作。也正因为对称加密是互逆的，对实时性强，IO量大的数据加密我们会优先使用对称加密操作。即使是https这种利用了非对称加密的技术，也会在建立secure channel之后切换到对称加密模式提高性能，这种方式叫做<strong>混合加密</strong>。</p>
-<p>说远了，说回T2芯片使用的AES-256（256代表key的长度）。这样的key有两个，一个是设备唯一的UID，另一个是出厂时的Group ID(GID)。他们共同为AES Crypto Engine提供key输入。对于这两段key的存储，这两段key被号称完全锁死在Secure Enclave Processor里（iPhone的A系列SoC中也设计了这样的芯片[6]），甚至不可以被硬件级debug interface获取到。看来在设计上，苹果对安全性做了破釜沉舟的加密设计。同时，为了防止加密在苹果的T2官方白皮书[1]里有写到，This dedicated   AES engine makes available only the results of encryption or decryption operations it performs。也就是说AES Crypto Engine是没有内存的，大概率是一块dedicate ASIC。</p>
-<p>众所周知，计算机系统对key的管理是有层次的(hierarchical)。就仿佛在现实生活中，我们都会把保密性稍弱的钥匙串放在保密性更强的保险柜里。保险柜的钥匙是所有钥匙的Master key，一旦保险柜被攻破，那么所有的其他的保密措施便形同虚设。FireVault作为对SSD全盘加密的主体，在key的层次上，一台macbook pro的最顶层的key是你设置的password，然后才是UID和GID。</p>
-<p>![image-20200114005224961](/images/Screenshot 2020-02-12 at 12.53.15 AM.png)</p>
-<p>因此，对于一台带有T2芯片的mac，我们在保证我们的system password没有被社工方式获取的前提下，无法通过任何方式获取硬盘中的内容。</p>
-<h1 id="T2芯片用于系统Secure-Boot"><a href="#T2芯片用于系统Secure-Boot" class="headerlink" title="T2芯片用于系统Secure Boot"></a>T2芯片用于系统Secure Boot</h1><p>如果读者尝试过自己给电脑重装操作系统，我们不难发现我们是从BIOS中引导其他的操作系统或者进入recover mode就可以抹除系统盘并且重装操作系统的。 或者说，我们可以从更先前的步骤做手脚，修改non-volatile memory中的UEFI古固件。</p>
-<p>所以无论是什么操作系统的计算机，都应该在启动阶段尽可能的早杜绝不明来源的二进制程序的读取。对计算机启动过程感兴趣的读者可以阅读[5]作为补充，在这里便不做叙述。</p>
-<p>T2芯片的secure enclave中会存储可信的UEFI固件的signature和操作系统的signature。具体secure boot过程中对signature的验证步骤见下图。</p>
-<p>![image-20200119002813239](/images/Screenshot 2020-02-12 at 12.53.23 AM.png)</p>
-<p>有了这样的防护措施，哪怕是骇客想启动recover mode或者引导其他的操作系统也会被T2芯片拦截。</p>
-<h1 id="T2芯片用于touch-id指纹认证"><a href="#T2芯片用于touch-id指纹认证" class="headerlink" title="T2芯片用于touch-id指纹认证"></a>T2芯片用于touch-id指纹认证</h1><p>指纹作为重要的生物特征，将这个重要的敏感信息存储到操作系统内任意的存储位置都有风险。尤其是苹果想把touch-id这个功能放到笔记本电脑上，为了防止被hack也要额外的小心。</p>
-<p>不过对于这一部分，mac的解决方案和A系列SoC的方式是差不多的，很明显是借鉴了多年来移动SoC设计中的best practice。</p>
-<h1 id="T2芯片用于保护麦克风使用权限"><a href="#T2芯片用于保护麦克风使用权限" class="headerlink" title="T2芯片用于保护麦克风使用权限"></a>T2芯片用于保护麦克风使用权限</h1><p>很早之前曾救有一张图在互联网上传播，就是马克 扎克伯格的笔记本电脑用贴纸贴住摄像头和麦克风的一张图。不过现在不用了，T2在白皮书中提到，当盖子合上之后，麦克风是相当于硬件断开的。不过众所周知，从macOS Mojave开始，OS已经对麦克风权限在软件层面上做了比较严格的权限。这次再硬件上的保护可以说把“用贴纸贴住麦克风”这件事成为了历史。</p>
-<p>至于视频，T2没有对视频做断开。主要原因还是盖子合上的时候原生的笔记本摄像头已经什么都看不到了。（当然如果你是一个视频主播，或者有额外的摄像头，从安全角度我还是建议对摄像头做额外的措施）。</p>
-<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p>[1]Apple T2 security chip official overview<br>[2]Wikipedia page <i>Bitlocker</i>: <a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/BitLocker">https://zh.wikipedia.org/wiki/BitLocker</a><br>[3]Youtube video <i>Apple’s T2 Chip Explained</i>:<a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=GsP0JeXv6m4">https://www.youtube.com/watch?v=GsP0JeXv6m4</a></p>
-<p>[4]An article from <em>AppleInsider</em>: <a target="_blank" rel="noopener" href="https://appleinsider.com/articles/18/08/08/everything-you-need-to-know-about-apples-t2-chip-in-the-2018-macbook-pro">https://appleinsider.com/articles/18/08/08/everything-you-need-to-know-about-apples-t2-chip-in-the-2018-macbook-pro</a></p>
-<p>[5]<em>Understanding the Boot Process BIOS vs UEFI</em>  <a target="_blank" rel="noopener" href="https://linuxhint.com/understanding_boot_process_bios_uefi/">https://linuxhint.com/understanding_boot_process_bios_uefi/</a></p>
-<p>[6]Wikipedia page <em>Apple A7 Soc</em> <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Apple_A7">https://en.wikipedia.org/wiki/Apple_A7</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/01/10/2020-01-10/" data-id="cklgtd0ee00084inb4lvqg9rd" data-title="[消费电子] Apple的T2芯片究竟是做什么的" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/01/26/2020-01-26/" data-id="cklhq789m00084hoogoiu69k7" data-title="[LeetCode] 779. 第K个语法符号" class="article-share-link">分享</a>
       
       
       
@@ -274,7 +206,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2019/02/08/2019-02-08/" data-id="cklgtd0eb00054inbegcp6c2q" data-title="[东拼西凑] P and NP" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2019/02/08/2019-02-08/" data-id="cklhq789f00054hooacg9de2f" data-title="[东拼西凑] P and NP" class="article-share-link">分享</a>
       
       
       
@@ -373,7 +305,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2019/01/19/%202019-01-19/" data-id="cklgtd0ea00044inb02ia864v" data-title="[有始无终] A Brief Introduction to Reinforcement Learning" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2019/01/19/%202019-01-19/" data-id="cklhq789c00044hoo803r0dds" data-title="[有始无终] A Brief Introduction to Reinforcement Learning" class="article-share-link">分享</a>
       
       
       
