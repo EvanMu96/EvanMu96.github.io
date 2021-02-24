@@ -73,6 +73,59 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-2020-02-15" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/02/15/2020-02-15/" class="article-date">
+  <time class="dt-published" datetime="2020-02-15T13:10:26.000Z" itemprop="datePublished">2020-02-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/02/15/2020-02-15/">[编译原理学习笔记] 如何构建一个简单的分支预测语法分析器</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>递归下降分析方法（Recursive-descent parsing）是一种 自定向下的 （top-down）的语法分析方法。</p>
+<p>预测分析法（Predictive parsing）是递归下降分析方法的一种简单形式。在预测分析法中，各个非终结符号对应的过程中的控制流可以由 lookahead 符号<strong>无二义</strong>地确定。</p>
+<p>对类似 C/Java 的文法规则做一些归纳：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">stmt -&gt; expr;</span><br><span class="line">			| if(expr) stmt;</span><br><span class="line">			| for(optexpr; optexpr; optexpr) stmt</span><br><span class="line">			| other</span><br><span class="line">optexpr -&gt; ε </span><br><span class="line">			| expr</span><br></pre></td></tr></table></figure>
+
+<p>预测分析法对于一个stmt的lookahead会被初始化为一个非终结符号的第一个终结符号。比如for语句的第一个终结符号就是<code>for</code>。预测分析法的实现框架如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 终结符号类型 terminal</span><br><span class="line">void stmt() &#123;</span><br><span class="line">	switch(lookahead) &#123;</span><br><span class="line">		case tok_expr:</span><br><span class="line">			match(expr);match(&#39;;&#39;);break;</span><br><span class="line">		case tok_if:</span><br><span class="line">			match(tok_if);match(&#39;(&#39;);match(expr);match(&#39;)&#39;);stmt();</span><br><span class="line">			break;</span><br><span class="line">		case tok_for:</span><br><span class="line">			match(tok_for);match(&#39;(&#39;);optexpr();match(&#39;;&#39;)optexpr</span><br><span class="line">	&#125;</span><br><span class="line">	case other:</span><br><span class="line">		match(other); break;</span><br><span class="line">	default:</span><br><span class="line">		&#x2F;&#x2F; raise an syntax error</span><br><span class="line">		break;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void optexpr() &#123;</span><br><span class="line">	if(lookahead &#x3D;&#x3D; expr) match(expr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void match(terminal t) &#123;</span><br><span class="line">	if(lookahead &#x3D;&#x3D; t) lookahead &#x3D; next_terminal;</span><br><span class="line">	else </span><br><span class="line">	&#x2F;&#x2F; raise an syntax error</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>构建这样的一个预测分析器，要对所有的非终结符定义一个处理的函数。比如上面的stmt和optexpr两个非终结符。</p>
+<p>对于非终结符的处理函数，要做下面两件事情：</p>
+<ol>
+<li>检查lookahead符号，确定要选择哪一个产生式（用一个大 switch 涵盖所有的 case）</li>
+<li>对于每一个分支，模拟被选中的产生式的解析过程。</li>
+</ol>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>[1]编译原理(Compilers Principles, Techniques and Tools)， 机械工业出版社</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2020/02/15/2020-02-15/" data-id="cklj09odv000a45oedm3y460n" data-title="[编译原理学习笔记] 如何构建一个简单的分支预测语法分析器" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-2020-02-08" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2020/02/08/2020-02-08/" class="article-date">
@@ -105,7 +158,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/02/08/2020-02-08/" data-id="cklhxcv0o00093aoee3wxgf9j" data-title="[最近的日常] vol.0" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/02/08/2020-02-08/" data-id="cklj09odu000945oeft5b6s9p" data-title="[最近的日常] vol.0" class="article-share-link">分享</a>
       
       
       
@@ -166,7 +219,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/01/26/2020-01-26/" data-id="cklhxcv0n00083aoedj18f9vo" data-title="[LeetCode] 779. 第K个语法符号" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/01/26/2020-01-26/" data-id="cklj09odt000845oe2kdwefz9" data-title="[LeetCode] 779. 第K个语法符号" class="article-share-link">分享</a>
       
       
       
@@ -206,7 +259,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2019/02/08/2019-02-08/" data-id="cklhxcv0a00053aoe06vy068i" data-title="[东拼西凑] P and NP" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2019/02/08/2019-02-08/" data-id="cklj09odp000545oefiilcs0s" data-title="[东拼西凑] P and NP" class="article-share-link">分享</a>
       
       
       
@@ -305,7 +358,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2019/01/19/%202019-01-19/" data-id="cklhxcv0800043aoegevq0cop" data-title="[有始无终] A Brief Introduction to Reinforcement Learning" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2019/01/19/%202019-01-19/" data-id="cklj09odo000445oe6k0oei1m" data-title="[有始无终] A Brief Introduction to Reinforcement Learning" class="article-share-link">分享</a>
       
       
       
@@ -353,6 +406,10 @@
       <ul>
         
           <li>
+            <a href="/2021/02/23/2021-02-23/">[编程随记]CPython 中的小整数池的实现</a>
+          </li>
+        
+          <li>
             <a href="/2021/02/02/2021-02-02/">[C++]实现std::move和std::forward</a>
           </li>
         
@@ -366,10 +423,6 @@
         
           <li>
             <a href="/2020/11/23/2020-11-24/">[我的推荐列表]动画推荐列表</a>
-          </li>
-        
-          <li>
-            <a href="/2020/11/22/2020-11-23/">[文章备份][转载]如何排解政治性抑郁</a>
           </li>
         
       </ul>
