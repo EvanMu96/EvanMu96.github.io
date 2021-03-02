@@ -73,6 +73,71 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-2021-02-26" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/02/26/2021-02-26/" class="article-date">
+  <time class="dt-published" datetime="2021-02-26T02:10:31.000Z" itemprop="datePublished">2021-02-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/02/26/2021-02-26/">[开发环境]切换到vcpkg</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>过去看到 laike9m 的博客讲到他喜欢的编程语言，其中共鸣很深的一点是</p>
+<blockquote>
+<p>Python is my favourite language, whose simplicity and powerfulness fascinates me. C++ is great, but writing C++ code is of less fun.</p>
+</blockquote>
+<p>对于没有什么性能指标的个人项目我是很喜欢用 Python 写的，同时在工作中写游戏服务器也大量用到 C++，每次想用 C++ 写一个个人项目时我就开始想 ”啊，又要一个 CMake 搞一下午了“ ，然后放弃。</p>
+<p>最近几年微软的开源产品的质量有了很大的提升，然后在了解到 vcpkg 可以兼容 CMake 之后决定把整个 C++ 工作环境迁移到 vcpkg 上。这篇文章用于积累我常用的 vcpkg 命令。</p>
+<h2 id="我的-C-工作环境"><a href="#我的-C-工作环境" class="headerlink" title="我的 C++ 工作环境"></a>我的 C++ 工作环境</h2><p>Windows : MSBuild/ CMake </p>
+<p>Linux/ MacOS: CMake</p>
+<p>所以我选择干脆把三台机器都装上 vcpkg。</p>
+<h2 id="简单的使用"><a href="#简单的使用" class="headerlink" title="简单的使用"></a>简单的使用</h2><p>场景：我想要写一些简单的 OpenGL 程序，需要用到的库大概有 glfw（动态或者静态库），glew（静态链接）另外我想用一个简单的日志库所以选择 spdlog。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/microsoft/vcpkg</span><br><span class="line"><span class="comment"># for windows</span></span><br><span class="line"><span class="comment"># bootstrap-vcpkg.bat</span></span><br><span class="line">sh bootstrap-vcpkg.sh</span><br></pre></td></tr></table></figure>
+
+<p>由于 vcpkg 完全托管在 GitHub 上的，更新的话只需要 pull 一下最新的代码就好了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> vcpkg &amp;&amp; git pull</span><br></pre></td></tr></table></figure>
+
+<p>查找以及安装依赖</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vcpkg search gl <span class="comment"># 可以搜很多很多到 OpenGL 和依赖到 OpenGL 的库</span></span><br><span class="line">vcpkg install glfw3 spdlog <span class="comment"># install with dynamic link</span></span><br><span class="line">vcpkg install glew:x86-windows-static <span class="comment"># install with static lib</span></span><br></pre></td></tr></table></figure>
+
+<p>如果使用的时 Visual Studio，一个命令就可以直接集成到开发环境中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.\vcpkg\vcpkg integrate install</span><br></pre></td></tr></table></figure>
+
+<p>构建项目的时候</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake .. -DCMAKE_TOOLCHAIN_FILE=.../vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows-static</span><br></pre></td></tr></table></figure>
+
+<h2 id="后续使用感想"><a href="#后续使用感想" class="headerlink" title="后续使用感想"></a>后续使用感想</h2><p>（待续）</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2021/02/26/2021-02-26/" data-id="cklrtbik7000y42oufqoc6ry1" data-title="[开发环境]切换到vcpkg" class="article-share-link">分享</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/C-vcpkg-Notes/" rel="tag">C++, vcpkg, Notes</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-2021-02-23" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/02/23/2021-02-23/" class="article-date">
@@ -130,10 +195,12 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2021/02/23/2021-02-23/" data-id="ckll0yfyx000i6mn95iw73lxx" data-title="[编程随记]CPython 中的小整数池的实现" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2021/02/23/2021-02-23/" data-id="cklrtbik5000v42ou0nsvh7ao" data-title="[编程随记]CPython 中的小整数池的实现" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CPython-VM/" rel="tag">CPython, VM</a></li></ul>
+
     </footer>
   </div>
   
@@ -174,10 +241,12 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2021/02/02/2021-02-02/" data-id="ckll0yfyw000h6mn946s8757t" data-title="[C++]实现std::move和std::forward" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2021/02/02/2021-02-02/" data-id="cklrtbik3000t42ou0jad2pt8" data-title="[C++]实现std::move和std::forward" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/C-STL/" rel="tag">C++, STL</a></li></ul>
+
     </footer>
   </div>
   
@@ -215,10 +284,12 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2021/01/05/2021-01-02/" data-id="ckll0yfyv000g6mn9figqb4xg" data-title="[南来北往]京沪卧铺动车乘坐体验" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2021/01/05/2021-01-02/" data-id="cklrtbik2000r42ou0idn5kmy" data-title="[南来北往]京沪卧铺动车乘坐体验" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Life/" rel="tag">Life</a></li></ul>
+
     </footer>
   </div>
   
@@ -275,10 +346,12 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2021/01/05/2020-01-01/" data-id="ckll0yfyi00076mn91lcw6zak" data-title="[最近的日常]2020年末装机杂记" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2021/01/05/2020-01-01/" data-id="cklrtbijk000842oudj663nmw" data-title="[最近的日常]2020年末装机杂记" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Life/" rel="tag">Life</a></li></ul>
+
     </footer>
   </div>
   
@@ -347,10 +420,12 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/11/23/2020-11-24/" data-id="ckll0yfyu000f6mn94qdoaa9x" data-title="[我的推荐列表]动画推荐列表" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/11/23/2020-11-24/" data-id="cklrtbik0000p42ou1anl6a3x" data-title="[我的推荐列表]动画推荐列表" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Anime/" rel="tag">Anime</a></li></ul>
+
     </footer>
   </div>
   
@@ -397,10 +472,12 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/11/22/2020-11-23/" data-id="ckll0yfyt000e6mn98jj80ek3" data-title="[文章备份][转载]如何排解政治性抑郁" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/11/22/2020-11-23/" data-id="cklrtbijy000m42ouf3vif0do" data-title="[文章备份][转载]如何排解政治性抑郁" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Backup/" rel="tag">Backup</a></li></ul>
+
     </footer>
   </div>
   
@@ -446,10 +523,12 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/08/16/2020-08-16/" data-id="ckll0yfys000d6mn9aifaa4vg" data-title="[最近的日常]成为了游戏服务器程序员" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/08/16/2020-08-16/" data-id="cklrtbijx000l42ou39ysff8o" data-title="[最近的日常]成为了游戏服务器程序员" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Life/" rel="tag">Life</a></li></ul>
+
     </footer>
   </div>
   
@@ -574,10 +653,12 @@ return 0;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/03/25/2020-03-25/" data-id="ckll0yfyq000c6mn941knbgnp" data-title="[LeetCode] 数组的区间信息类型题目" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/03/25/2020-03-25/" data-id="cklrtbiju000i42ou6ymbhowd" data-title="[LeetCode] 数组的区间信息类型题目" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li></ul>
+
     </footer>
   </div>
   
@@ -627,97 +708,12 @@ return 0;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/03/05/2020-03-05/" data-id="ckll0yfyp000b6mn9cstm2gd4" data-title="[LeetCode] 994.腐烂的橘子" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/03/05/2020-03-05/" data-id="cklrtbijt000g42ou4ghu4j0l" data-title="[LeetCode] 994.腐烂的橘子" class="article-share-link">分享</a>
       
       
       
-    </footer>
-  </div>
-  
-</article>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Leetcode/" rel="tag">Leetcode</a></li></ul>
 
-
-
-  
-    <article id="post-2019-02-26" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2020/02/26/2019-02-26/" class="article-date">
-  <time class="dt-published" datetime="2020-02-25T17:17:51.000Z" itemprop="datePublished">2020-02-26</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2020/02/26/2019-02-26/"> [东拼西凑] AC自动机算法</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>最近在看龙书<em>Compilers, Principles, Techniques, and Tools</em>，涉及到了一点关于字符串匹配/正则表达式/自动机理论的知识。在词法分析这一章节介绍了一个字符串匹配算法AC自动机，我觉得它理解起来并不是很难，只是一个过去算法的综合。所以尝试写一篇文章来介绍这个算法。顺便做一点coding练习。</p>
-<p>AC自动机算法「Aho-Corasick」是一个通过构建一个代表trie的finite-state machine的字符串/字典匹配算法。要介绍它离不开介绍一个更常见的算法KMP和一种字典数据结构trie树。</p>
-<h2 id="KMP算法"><a href="#KMP算法" class="headerlink" title="KMP算法"></a>KMP算法</h2><p>时间复杂度O(m+n) m for string length, n for pattern length</p>
-<p>说到从一个序列中匹配一个目标字符串，最简单的办法就是把序列中的每一个字符作为起点，向后试探是否能够与目标字符串匹配，一旦是不匹配就将起点向后移一位。</p>
-<img src="/Users/komoriii/Documents/GitHub/EvanMu96.github.io/public/images/problem1.png" style="zoom:50%;" />
-
-<p>这种最接近brute-force的算法，也可以用一个DFA来描述。如果每次读取的一个字符是pattern匹配的下一个字符，那么移动到下一个状态，但是每次都是回到0号状态，导致时间复杂度是O(mn)。</p>
-<p><img src="/images/bfsm.png"></p>
-<p>KMP算法要解决的问题就是，如何尽可能回退更少的状态。所以引入了一个映射叫做失效函数。根据pattern的特性，每一个pattern有着不同的失效函数。失效函数f(s)的目标是使得b1b2…bf(s)是最长的，既是b1b2…bs的真前缀，又是b1b2…bs的后缀子串。这样回退的状态就不再是一股脑地回退到0号状态，而是回退到号码是f(s)的状态。</p>
-<p>对于ababaaa 失效函数是这样构造的</p>
-<table>
-<thead>
-<tr>
-<th>s</th>
-<th>1</th>
-<th>2</th>
-<th>3</th>
-<th>4</th>
-<th>5</th>
-<th>6</th>
-<th>7</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>f(s)</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-<td>2</td>
-<td>3</td>
-<td>1</td>
-<td>1</td>
-</tr>
-</tbody></table>
-<p>对于ababaaa的KMP版本的DFA是这样的</p>
-<p><img src="/images/kmpsm.png" alt="kmpsm"></p>
-<p>构造这样一个失效函数可以用如下的算法，找到每一个s对应的f(s)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;伪代码 仅用来描述算法</span><br><span class="line">&#x2F;&#x2F;pseudocode for s-&gt;f(s) generatiion</span><br><span class="line">b &#x3D; &quot;some string&quot;</span><br><span class="line">t &#x3D; 0;</span><br><span class="line">f[1] &#x3D; 0; &#x2F;&#x2F;</span><br><span class="line">for(s&#x3D;1; s&lt;n; s++)&#123;</span><br><span class="line">	while(t&gt;0&amp;&amp;b[s+1]! &#x3D; b[t+1]) t &#x3D; f(t);</span><br><span class="line">	if(b[s+1] &#x3D;&#x3D; b[t+1])&#123;</span><br><span class="line">		t&#x3D;t+1;</span><br><span class="line">		f[s+1]&#x3D;t;</span><br><span class="line">	&#125;</span><br><span class="line">	else f[s+1] &#x3D; 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="Trie树"><a href="#Trie树" class="headerlink" title="Trie树"></a>Trie树</h2><p>Trie树也叫做前缀树。它是一种搜索树，但是与二分搜索树不同的是，它的key不保存在节点中，而是与这个节点在树中的位置直接相关的。</p>
-<p>比如一个存储了4个key的trie树是这样的。</p>
-<p><img src="/images/trie.png" alt="trie"></p>
-<h2 id="Aho-Corasick算法"><a href="#Aho-Corasick算法" class="headerlink" title="Aho-Corasick算法"></a>Aho-Corasick算法</h2><p>Aho「龙书的作者」和Corasick对KMP算法进行了推广，当我们知道一个pattern字典(a set of patterns)，这些pattern就可以组合成一个trie树。同时，由于KMP的失效函数的思想，在这样一个trie树的结构下就可以在不同的分支「即是不同的pattern」之间转移状态。</p>
-<p><img src="/images/acsm.png" alt="acsm"></p>
-<h2 id="算法实现"><a href="#算法实现" class="headerlink" title="算法实现"></a>算法实现</h2><p>实现Aho-Corasic算法首先要构建一个Trie树（如何实现一个Trie树可以参考维基百科的Trie词条或者LeetCode <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/implement-trie-prefix-tree/">https://leetcode-cn.com/problems/implement-trie-prefix-tree/</a> (这是LeetCode中国的链接，题号与国际版本相同)），然后修改节点添加失效函数，也就是匹配失效时候状态转移的轨迹。<br>下面的C++代码实现主要来自: <a target="_blank" rel="noopener" href="https://cp-algorithms.com/string/aho_corasick.html#toc-tgt-7">https://cp-algorithms.com/string/aho_corasick.html#toc-tgt-7</a> 我仅仅添加了一些注释和测试用例。  </p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> K = <span class="number">26</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Vertex</span> &#123;</span></span><br><span class="line">    <span class="comment">// where to link</span></span><br><span class="line">    <span class="keyword">int</span> next[K];</span><br><span class="line">    <span class="comment">// is it the last character of a word</span></span><br><span class="line">    <span class="keyword">bool</span> leaf = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">int</span> p = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">char</span> pch;</span><br><span class="line">    <span class="keyword">int</span> link = <span class="number">-1</span>;</span><br><span class="line">    <span class="comment">// where to move buffer</span></span><br><span class="line">    <span class="keyword">int</span> go[K];</span><br><span class="line">    <span class="comment">// default parameters lead to a root</span></span><br><span class="line">    Vertex(<span class="keyword">int</span> p=<span class="number">-1</span>, <span class="keyword">char</span> ch=<span class="string">&#x27;$&#x27;</span>) : p(p), pch(ch) &#123;</span><br><span class="line">        <span class="comment">// initialized all direction into -1</span></span><br><span class="line">        fill(begin(next), end(next), <span class="number">-1</span>);</span><br><span class="line">        fill(begin(go), end(go), <span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="built_in">vector</span>&lt;Vertex&gt; <span class="title">t</span><span class="params">(<span class="number">1</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">add_string</span><span class="params">(<span class="built_in">string</span> <span class="keyword">const</span>&amp; s)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> v = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">char</span> ch : s) &#123;</span><br><span class="line">        <span class="keyword">int</span> c = ch - <span class="string">&#x27;a&#x27;</span>;</span><br><span class="line">        <span class="keyword">if</span> (t[v].next[c] == <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="comment">// append a new Vertex </span></span><br><span class="line">            t[v].next[c] = t.size();</span><br><span class="line">            t.emplace_back(v, ch);</span><br><span class="line">        &#125;</span><br><span class="line">        v = t[v].next[c];   </span><br><span class="line">    &#125;</span><br><span class="line">    t[v].leaf = <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">go</span><span class="params">(<span class="keyword">int</span> v, <span class="keyword">char</span> ch)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">get_link</span><span class="params">(<span class="keyword">int</span> v)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (t[v].link == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (v == <span class="number">0</span> || t[v].p == <span class="number">0</span>)</span><br><span class="line">            t[v].link = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="comment">// recursively find the parent and try again</span></span><br><span class="line">            <span class="comment">// until it reachs the root(v = 0)</span></span><br><span class="line">            t[v].link = go(get_link(t[v].p), t[v].pch);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> t[v].link;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">go</span><span class="params">(<span class="keyword">int</span> v, <span class="keyword">char</span> ch)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> c = ch - <span class="string">&#x27;a&#x27;</span>;</span><br><span class="line">    <span class="keyword">if</span> (t[v].go[c] == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (t[v].next[c] != <span class="number">-1</span>)</span><br><span class="line">            t[v].go[c] = t[v].next[c];</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="comment">// recursively find the parent and try again</span></span><br><span class="line">            <span class="comment">// until it reachs the root(v = 0)</span></span><br><span class="line">            t[v].go[c] = v == <span class="number">0</span> ? <span class="number">0</span> : go(get_link(v), ch);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> t[v].go[c];</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">traverse</span><span class="params">(<span class="built_in">string</span> <span class="keyword">const</span> &amp; obj)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> v = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; obj.size(); i++)</span><br><span class="line">    &#123; </span><br><span class="line">        v = go(v, obj[i]);</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; t[v].pch &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">        <span class="keyword">if</span>(t[v].leaf)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;OK&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    add_string(<span class="string">&quot;tas&quot;</span>);</span><br><span class="line">    add_string(<span class="string">&quot;app&quot;</span>);</span><br><span class="line">    add_string(<span class="string">&quot;ray&quot;</span>);</span><br><span class="line">    add_string(<span class="string">&quot;mac&quot;</span>);</span><br><span class="line">    traverse(<span class="string">&quot;taspratray&quot;</span>); <span class="comment">//t a s OK$ r a t r a y OK</span></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    traverse(<span class="string">&quot;fhduisufdasfdsaseh&quot;</span>); <span class="comment">//$ $ $ $ $ $ $ $ $ a $ $ $ $ a $ $ $ </span></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    traverse(<span class="string">&quot;fesafeasmacapp&quot;</span>); <span class="comment">//$ $ $ a $ $ a $ m a c OKa p p OK</span></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p>[1]Wikipedia <em>Trie Tree</em> <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Trie">https://en.wikipedia.org/wiki/Trie</a></p>
-<p>[2]<em>数据结构(C++语言版)</em> 邓俊辉 「第三版」</p>
-<p>[3]<em>Compilers, Principles, Techniques, and Tools 编译原理</em> Alfred V.Aho等 机械工业出版社<br>[3]cp-algorithms.com <a target="_blank" rel="noopener" href="https://cp-algorithms.com/string/aho_corasick.html#">https://cp-algorithms.com/string/aho_corasick.html#</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/02/26/2019-02-26/" data-id="ckll0yfyh00066mn9evr44sfv" data-title=" [东拼西凑] AC自动机算法" class="article-share-link">分享</a>
-      
-      
-      
     </footer>
   </div>
   
@@ -741,9 +737,23 @@ return 0;
 
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Anime/" rel="tag">Anime</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Backup/" rel="tag">Backup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C-STL/" rel="tag">C++, STL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C-vcpkg-Notes/" rel="tag">C++, vcpkg, Notes</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CPython-VM/" rel="tag">CPython, VM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Leetcode/" rel="tag">Leetcode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Life/" rel="tag">Life</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Notes/" rel="tag">Notes</a></li></ul>
+    </div>
+  </div>
+
 
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Anime/" style="font-size: 10px;">Anime</a> <a href="/tags/Backup/" style="font-size: 10px;">Backup</a> <a href="/tags/C-STL/" style="font-size: 10px;">C++, STL</a> <a href="/tags/C-vcpkg-Notes/" style="font-size: 10px;">C++, vcpkg, Notes</a> <a href="/tags/CPython-VM/" style="font-size: 10px;">CPython, VM</a> <a href="/tags/LeetCode/" style="font-size: 10px;">LeetCode</a> <a href="/tags/Leetcode/" style="font-size: 15px;">Leetcode</a> <a href="/tags/Life/" style="font-size: 20px;">Life</a> <a href="/tags/Notes/" style="font-size: 20px;">Notes</a>
+    </div>
+  </div>
+
   
     
   <div class="widget-wrap">
@@ -762,6 +772,10 @@ return 0;
       <ul>
         
           <li>
+            <a href="/2021/02/26/2021-02-26/">[开发环境]切换到vcpkg</a>
+          </li>
+        
+          <li>
             <a href="/2021/02/23/2021-02-23/">[编程随记]CPython 中的小整数池的实现</a>
           </li>
         
@@ -775,10 +789,6 @@ return 0;
         
           <li>
             <a href="/2021/01/05/2020-01-01/">[最近的日常]2020年末装机杂记</a>
-          </li>
-        
-          <li>
-            <a href="/2020/11/23/2020-11-24/">[我的推荐列表]动画推荐列表</a>
           </li>
         
       </ul>

@@ -73,6 +73,95 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-2019-02-26" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/02/26/2019-02-26/" class="article-date">
+  <time class="dt-published" datetime="2020-02-25T17:17:51.000Z" itemprop="datePublished">2020-02-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/02/26/2019-02-26/"> [东拼西凑] AC自动机算法</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>最近在看龙书<em>Compilers, Principles, Techniques, and Tools</em>，涉及到了一点关于字符串匹配/正则表达式/自动机理论的知识。在词法分析这一章节介绍了一个字符串匹配算法AC自动机，我觉得它理解起来并不是很难，只是一个过去算法的综合。所以尝试写一篇文章来介绍这个算法。顺便做一点coding练习。</p>
+<p>AC自动机算法「Aho-Corasick」是一个通过构建一个代表trie的finite-state machine的字符串/字典匹配算法。要介绍它离不开介绍一个更常见的算法KMP和一种字典数据结构trie树。</p>
+<h2 id="KMP算法"><a href="#KMP算法" class="headerlink" title="KMP算法"></a>KMP算法</h2><p>时间复杂度O(m+n) m for string length, n for pattern length</p>
+<p>说到从一个序列中匹配一个目标字符串，最简单的办法就是把序列中的每一个字符作为起点，向后试探是否能够与目标字符串匹配，一旦是不匹配就将起点向后移一位。</p>
+<img src="/Users/komoriii/Documents/GitHub/EvanMu96.github.io/public/images/problem1.png" style="zoom:50%;" />
+
+<p>这种最接近brute-force的算法，也可以用一个DFA来描述。如果每次读取的一个字符是pattern匹配的下一个字符，那么移动到下一个状态，但是每次都是回到0号状态，导致时间复杂度是O(mn)。</p>
+<p><img src="/images/bfsm.png"></p>
+<p>KMP算法要解决的问题就是，如何尽可能回退更少的状态。所以引入了一个映射叫做失效函数。根据pattern的特性，每一个pattern有着不同的失效函数。失效函数f(s)的目标是使得b1b2…bf(s)是最长的，既是b1b2…bs的真前缀，又是b1b2…bs的后缀子串。这样回退的状态就不再是一股脑地回退到0号状态，而是回退到号码是f(s)的状态。</p>
+<p>对于ababaaa 失效函数是这样构造的</p>
+<table>
+<thead>
+<tr>
+<th>s</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>f(s)</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<p>对于ababaaa的KMP版本的DFA是这样的</p>
+<p><img src="/images/kmpsm.png" alt="kmpsm"></p>
+<p>构造这样一个失效函数可以用如下的算法，找到每一个s对应的f(s)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;伪代码 仅用来描述算法</span><br><span class="line">&#x2F;&#x2F;pseudocode for s-&gt;f(s) generatiion</span><br><span class="line">b &#x3D; &quot;some string&quot;</span><br><span class="line">t &#x3D; 0;</span><br><span class="line">f[1] &#x3D; 0; &#x2F;&#x2F;</span><br><span class="line">for(s&#x3D;1; s&lt;n; s++)&#123;</span><br><span class="line">	while(t&gt;0&amp;&amp;b[s+1]! &#x3D; b[t+1]) t &#x3D; f(t);</span><br><span class="line">	if(b[s+1] &#x3D;&#x3D; b[t+1])&#123;</span><br><span class="line">		t&#x3D;t+1;</span><br><span class="line">		f[s+1]&#x3D;t;</span><br><span class="line">	&#125;</span><br><span class="line">	else f[s+1] &#x3D; 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Trie树"><a href="#Trie树" class="headerlink" title="Trie树"></a>Trie树</h2><p>Trie树也叫做前缀树。它是一种搜索树，但是与二分搜索树不同的是，它的key不保存在节点中，而是与这个节点在树中的位置直接相关的。</p>
+<p>比如一个存储了4个key的trie树是这样的。</p>
+<p><img src="/images/trie.png" alt="trie"></p>
+<h2 id="Aho-Corasick算法"><a href="#Aho-Corasick算法" class="headerlink" title="Aho-Corasick算法"></a>Aho-Corasick算法</h2><p>Aho「龙书的作者」和Corasick对KMP算法进行了推广，当我们知道一个pattern字典(a set of patterns)，这些pattern就可以组合成一个trie树。同时，由于KMP的失效函数的思想，在这样一个trie树的结构下就可以在不同的分支「即是不同的pattern」之间转移状态。</p>
+<p><img src="/images/acsm.png" alt="acsm"></p>
+<h2 id="算法实现"><a href="#算法实现" class="headerlink" title="算法实现"></a>算法实现</h2><p>实现Aho-Corasic算法首先要构建一个Trie树（如何实现一个Trie树可以参考维基百科的Trie词条或者LeetCode <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/implement-trie-prefix-tree/">https://leetcode-cn.com/problems/implement-trie-prefix-tree/</a> (这是LeetCode中国的链接，题号与国际版本相同)），然后修改节点添加失效函数，也就是匹配失效时候状态转移的轨迹。<br>下面的C++代码实现主要来自: <a target="_blank" rel="noopener" href="https://cp-algorithms.com/string/aho_corasick.html#toc-tgt-7">https://cp-algorithms.com/string/aho_corasick.html#toc-tgt-7</a> 我仅仅添加了一些注释和测试用例。  </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> K = <span class="number">26</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Vertex</span> &#123;</span></span><br><span class="line">    <span class="comment">// where to link</span></span><br><span class="line">    <span class="keyword">int</span> next[K];</span><br><span class="line">    <span class="comment">// is it the last character of a word</span></span><br><span class="line">    <span class="keyword">bool</span> leaf = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">int</span> p = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">char</span> pch;</span><br><span class="line">    <span class="keyword">int</span> link = <span class="number">-1</span>;</span><br><span class="line">    <span class="comment">// where to move buffer</span></span><br><span class="line">    <span class="keyword">int</span> go[K];</span><br><span class="line">    <span class="comment">// default parameters lead to a root</span></span><br><span class="line">    Vertex(<span class="keyword">int</span> p=<span class="number">-1</span>, <span class="keyword">char</span> ch=<span class="string">&#x27;$&#x27;</span>) : p(p), pch(ch) &#123;</span><br><span class="line">        <span class="comment">// initialized all direction into -1</span></span><br><span class="line">        fill(begin(next), end(next), <span class="number">-1</span>);</span><br><span class="line">        fill(begin(go), end(go), <span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="built_in">vector</span>&lt;Vertex&gt; <span class="title">t</span><span class="params">(<span class="number">1</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">add_string</span><span class="params">(<span class="built_in">string</span> <span class="keyword">const</span>&amp; s)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> v = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">char</span> ch : s) &#123;</span><br><span class="line">        <span class="keyword">int</span> c = ch - <span class="string">&#x27;a&#x27;</span>;</span><br><span class="line">        <span class="keyword">if</span> (t[v].next[c] == <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="comment">// append a new Vertex </span></span><br><span class="line">            t[v].next[c] = t.size();</span><br><span class="line">            t.emplace_back(v, ch);</span><br><span class="line">        &#125;</span><br><span class="line">        v = t[v].next[c];   </span><br><span class="line">    &#125;</span><br><span class="line">    t[v].leaf = <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">go</span><span class="params">(<span class="keyword">int</span> v, <span class="keyword">char</span> ch)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">get_link</span><span class="params">(<span class="keyword">int</span> v)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (t[v].link == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (v == <span class="number">0</span> || t[v].p == <span class="number">0</span>)</span><br><span class="line">            t[v].link = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="comment">// recursively find the parent and try again</span></span><br><span class="line">            <span class="comment">// until it reachs the root(v = 0)</span></span><br><span class="line">            t[v].link = go(get_link(t[v].p), t[v].pch);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> t[v].link;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">go</span><span class="params">(<span class="keyword">int</span> v, <span class="keyword">char</span> ch)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> c = ch - <span class="string">&#x27;a&#x27;</span>;</span><br><span class="line">    <span class="keyword">if</span> (t[v].go[c] == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (t[v].next[c] != <span class="number">-1</span>)</span><br><span class="line">            t[v].go[c] = t[v].next[c];</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="comment">// recursively find the parent and try again</span></span><br><span class="line">            <span class="comment">// until it reachs the root(v = 0)</span></span><br><span class="line">            t[v].go[c] = v == <span class="number">0</span> ? <span class="number">0</span> : go(get_link(v), ch);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> t[v].go[c];</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">traverse</span><span class="params">(<span class="built_in">string</span> <span class="keyword">const</span> &amp; obj)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> v = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; obj.size(); i++)</span><br><span class="line">    &#123; </span><br><span class="line">        v = go(v, obj[i]);</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; t[v].pch &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">        <span class="keyword">if</span>(t[v].leaf)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;OK&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    add_string(<span class="string">&quot;tas&quot;</span>);</span><br><span class="line">    add_string(<span class="string">&quot;app&quot;</span>);</span><br><span class="line">    add_string(<span class="string">&quot;ray&quot;</span>);</span><br><span class="line">    add_string(<span class="string">&quot;mac&quot;</span>);</span><br><span class="line">    traverse(<span class="string">&quot;taspratray&quot;</span>); <span class="comment">//t a s OK$ r a t r a y OK</span></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    traverse(<span class="string">&quot;fhduisufdasfdsaseh&quot;</span>); <span class="comment">//$ $ $ $ $ $ $ $ $ a $ $ $ $ a $ $ $ </span></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    traverse(<span class="string">&quot;fesafeasmacapp&quot;</span>); <span class="comment">//$ $ $ a $ $ a $ m a c OKa p p OK</span></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p>[1]Wikipedia <em>Trie Tree</em> <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Trie">https://en.wikipedia.org/wiki/Trie</a></p>
+<p>[2]<em>数据结构(C++语言版)</em> 邓俊辉 「第三版」</p>
+<p>[3]<em>Compilers, Principles, Techniques, and Tools 编译原理</em> Alfred V.Aho等 机械工业出版社<br>[3]cp-algorithms.com <a target="_blank" rel="noopener" href="https://cp-algorithms.com/string/aho_corasick.html#">https://cp-algorithms.com/string/aho_corasick.html#</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2020/02/26/2019-02-26/" data-id="cklrtbijh000742oudlr7dg0p" data-title=" [东拼西凑] AC自动机算法" class="article-share-link">分享</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Notes/" rel="tag">Notes</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-2020-02-15" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2020/02/15/2020-02-15/" class="article-date">
@@ -95,29 +184,31 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <p>Recursive-descent Parsing（递归下降分析方法）是一种自顶向下（top-down）的语法分析方法。</p>
-<p>Predictive parsing（预测分析法）是递归下降分析方法的一种简单形式。在预测分析法中，各个非终结符号对应的过程中的control flow可以由 lookahead 符号<strong>无二义</strong>地确定。</p>
+        <p>递归下降分析方法（Recursive-descent parsing）是一种 自定向下的 （top-down）的语法分析方法。</p>
+<p>预测分析法（Predictive parsing）是递归下降分析方法的一种简单形式。在预测分析法中，各个非终结符号对应的过程中的控制流可以由 lookahead 符号<strong>无二义</strong>地确定。</p>
 <p>对类似 C/Java 的文法规则做一些归纳：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">stmt -&gt; expr;</span><br><span class="line">			| if(expr) stmt;</span><br><span class="line">			| for(optexpr; optexpr; optexpr) stmt</span><br><span class="line">			| other</span><br><span class="line">optexpr -&gt; ε </span><br><span class="line">			| expr</span><br></pre></td></tr></table></figure>
 
-<p>预测分析法对于一个 stmt 的 lookahead 会被初始化为一个非终结符号的第一个终结符号。比如 for 语句的第一个终结符号就是 for。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 终结符号类型 terminal</span><br><span class="line">void stmt() &#123;</span><br><span class="line">	switch(lookahead) &#123;</span><br><span class="line">		case expr:</span><br><span class="line">			match(expr);match(&#39;;&#39;);break;</span><br><span class="line">		case if:</span><br><span class="line">			match(if);match(&#39;(&#39;);match(expr);match(&#39;)&#39;);stmt();</span><br><span class="line">			break;</span><br><span class="line">		case for:</span><br><span class="line">			match(for);match(&#39;(&#39;);optexpr();match(&#39;;&#39;)optexpr</span><br><span class="line">	&#125;</span><br><span class="line">	case other:</span><br><span class="line">		match(other); break;</span><br><span class="line">	default:</span><br><span class="line">		&#x2F;&#x2F; raise an syntax error</span><br><span class="line">		break;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void optexpr() &#123;</span><br><span class="line">	if(lookahead &#x3D;&#x3D; expr) match(expr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void match(terminal t) &#123;</span><br><span class="line">	if(lookahead &#x3D;&#x3D; t) lookahead &#x3D; next_terminal;</span><br><span class="line">	else </span><br><span class="line">	&#x2F;&#x2F; raise an syntax error</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>预测分析法对于一个stmt的lookahead会被初始化为一个非终结符号的第一个终结符号。比如for语句的第一个终结符号就是<code>for</code>。预测分析法的实现框架如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 终结符号类型 terminal</span><br><span class="line">void stmt() &#123;</span><br><span class="line">	switch(lookahead) &#123;</span><br><span class="line">		case tok_expr:</span><br><span class="line">			match(expr);match(&#39;;&#39;);break;</span><br><span class="line">		case tok_if:</span><br><span class="line">			match(tok_if);match(&#39;(&#39;);match(expr);match(&#39;)&#39;);stmt();</span><br><span class="line">			break;</span><br><span class="line">		case tok_for:</span><br><span class="line">			match(tok_for);match(&#39;(&#39;);optexpr();match(&#39;;&#39;)optexpr</span><br><span class="line">	&#125;</span><br><span class="line">	case other:</span><br><span class="line">		match(other); break;</span><br><span class="line">	default:</span><br><span class="line">		&#x2F;&#x2F; raise an syntax error</span><br><span class="line">		break;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void optexpr() &#123;</span><br><span class="line">	if(lookahead &#x3D;&#x3D; expr) match(expr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void match(terminal t) &#123;</span><br><span class="line">	if(lookahead &#x3D;&#x3D; t) lookahead &#x3D; next_terminal;</span><br><span class="line">	else </span><br><span class="line">	&#x2F;&#x2F; raise an syntax error</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>构建这样的一个预测分析器，要对所有的非终结符定义一个处理的函数。比如上面的stmt和optexpr两个非终结符。</p>
-<p>对于非终结符的处理函数，要做下面两件事情</p>
+<p>对于非终结符的处理函数，要做下面两件事情：</p>
 <ol>
-<li>检查 lookahead 符号，确定要选择哪一个产生式（比如用一个大 switch/if…else if…else if… ）</li>
-<li>对于每一个分支，模拟被选中的产生式的解析的过程。</li>
+<li>检查lookahead符号，确定要选择哪一个产生式（用一个大 switch 涵盖所有的 case）</li>
+<li>对于每一个分支，模拟被选中的产生式的解析过程。</li>
 </ol>
 <h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>[1]编译原理(Compilers Principles, Techniques and Tools)， 机械工业出版社</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/02/15/2020-02-15/" data-id="ckll0yfyo000a6mn91zyfgg16" data-title="[编译原理学习笔记] 如何构建一个简单的分支预测语法分析器" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/02/15/2020-02-15/" data-id="cklrtbijr000d42oucwrl6f99" data-title="[编译原理学习笔记] 如何构建一个简单的分支预测语法分析器" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Notes/" rel="tag">Notes</a></li></ul>
+
     </footer>
   </div>
   
@@ -158,10 +249,12 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/02/08/2020-02-08/" data-id="ckll0yfyl00096mn93u1o4aey" data-title="[最近的日常] vol.0" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/02/08/2020-02-08/" data-id="cklrtbijp000c42ouc0gecj3h" data-title="[最近的日常] vol.0" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Life/" rel="tag">Life</a></li></ul>
+
     </footer>
   </div>
   
@@ -219,10 +312,12 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/01/26/2020-01-26/" data-id="ckll0yfyk00086mn9ehyfdgia" data-title="[LeetCode] 779. 第K个语法符号" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/01/26/2020-01-26/" data-id="cklrtbijl000942oug93zcc77" data-title="[LeetCode] 779. 第K个语法符号" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Leetcode/" rel="tag">Leetcode</a></li></ul>
+
     </footer>
   </div>
   
@@ -259,10 +354,12 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2019/02/08/2019-02-08/" data-id="ckll0yfyg00056mn9caki220r" data-title="[东拼西凑] P and NP" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2019/02/08/2019-02-08/" data-id="cklrtbije000542ougy1p673t" data-title="[东拼西凑] P and NP" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Notes/" rel="tag">Notes</a></li></ul>
+
     </footer>
   </div>
   
@@ -308,60 +405,45 @@
 <h3 id="The-components-in-Reiforcement-Learning-Problem"><a href="#The-components-in-Reiforcement-Learning-Problem" class="headerlink" title="The components in Reiforcement Learning Problem"></a>The components in Reiforcement Learning Problem</h3><p>We need to train an agent instead of a dog for a general reinforcement learning task. So the first component should be the Agent. Except the agent, the all of other things are enviorment of the agent. The agent can change the state of environment by actions, then the environment feedback reward to agent, which is what a reinforcenemt learning system do.<br><a data-flickr-embed="true"  target="_blank" rel="noopener" href="https://www.flickr.com/photos/166826763@N02/46164422064/in/dateposted-public/" title="reiforcement learning"><img src="https://farm8.staticflickr.com/7811/46164422064_6006329497_b.jpg" width="1024" height="611" alt="reiforcement learning"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script></p>
 <h3 id="Is-there-any-examples-of-RL"><a href="#Is-there-any-examples-of-RL" class="headerlink" title="Is there any examples of RL"></a>Is there any examples of RL</h3><p>Sure. You may know the famous system developed by DeepMind, the AlphaGO is totally benefited by reinforcement learning. If you are a video game fans you may know there is a competition for traininig an AI to battle with Starcraft. Here I list few task examples which applied or could apply reinforcement learning.</p>
 <ul>
-<li><p>Game Playing(Go, atari, Starcraft)</p>
-</li>
-<li><p>Operations research(pricing, veichle routing)</p>
-</li>
-<li><p>Elevator control</p>
-</li>
-<li><p>Motor balance control (RL instead of PID I think?)</p>
-</li>
-<li><p>Spoken dialog systems</p>
-</li>
-<li><p>Data center energy optimization (some company do this by RL and the result is pretty good)</p>
-</li>
-<li><p>Self-managing network systems</p>
-</li>
-<li><p>Autonomous Vehicles (I think it is not a good idea for autonomous car… maybe other vehicle)</p>
-</li>
-<li><p>Computation Finance (My research topics currently)  </p>
+<li>Game Playing(Go, atari, Starcraft)</li>
+<li>Operations research(pricing, veichle routing)</li>
+<li>Elevator control</li>
+<li>Motor balance control (RL instead of PID I think?)</li>
+<li>Spoken dialog systems</li>
+<li>Data center energy optimization (some company do this by RL and the result is pretty good)</li>
+<li>Self-managing network systems</li>
+<li>Autonomous Vehicles (I think it is not a good idea for autonomous car… maybe other vehicle)</li>
+<li>Computation Finance (My research topics currently)  </li>
+</ul>
 <p>I would like to write more about the RL in Computational Finance.<br>In an automated trading system.</p>
-</li>
-<li><p>Agent: Trading software(trading bot)</p>
-</li>
-<li><p>Environment: other traders and the market</p>
-</li>
-<li><p>State: Price history and current price</p>
-</li>
-<li><p>Action: basic stock actions, buy/sell/hold etc</p>
-</li>
-<li><p>Reward: The Profit. Money.  </p>
-</li>
+<ul>
+<li>Agent: Trading software(trading bot)</li>
+<li>Environment: other traders and the market</li>
+<li>State: Price history and current price</li>
+<li>Action: basic stock actions, buy/sell/hold etc</li>
+<li>Reward: The Profit. Money.  </li>
 </ul>
 <p>Definitely we want to maximize our PROFIT.</p>
 <h3 id="Overview-of-the-RL"><a href="#Overview-of-the-RL" class="headerlink" title="Overview of the RL"></a>Overview of the RL</h3><p><b>Comprehensive, but challenging form of machine learning.</b>  </p>
 <ul>
-<li><p>Stochastic environment</p>
-</li>
-<li><p>Incomplete model (hardly to model but easy to behave by human)</p>
-</li>
-<li><p>Interdependent sequence if decision.</p>
-</li>
-<li><p>No supervision</p>
-</li>
-<li><p>Partial and delayed feedback (Some lag exists)  </p>
+<li>Stochastic environment</li>
+<li>Incomplete model (hardly to model but easy to behave by human)</li>
+<li>Interdependent sequence if decision.</li>
+<li>No supervision</li>
+<li>Partial and delayed feedback (Some lag exists)  </li>
+</ul>
 <p><b>- Long term goal: lifelong machine learning</b><br>Thank you for reading.</p>
 <h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference:"></a>Reference:</h3><p><a target="_blank" rel="noopener" href="https://cs.uwaterloo.ca/~ppoupart/teaching/cs885-spring18/schedule.html">https://cs.uwaterloo.ca/~ppoupart/teaching/cs885-spring18/schedule.html</a></p>
-</li>
-</ul>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2019/01/19/%202019-01-19/" data-id="ckll0yfxy00046mn9c9zefxgp" data-title="[有始无终] A Brief Introduction to Reinforcement Learning" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2019/01/19/%202019-01-19/" data-id="cklrtbijd000442ou6hxm56rb" data-title="[有始无终] A Brief Introduction to Reinforcement Learning" class="article-share-link">分享</a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Notes/" rel="tag">Notes</a></li></ul>
+
     </footer>
   </div>
   
@@ -385,9 +467,23 @@
 
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Anime/" rel="tag">Anime</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Backup/" rel="tag">Backup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C-STL/" rel="tag">C++, STL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C-vcpkg-Notes/" rel="tag">C++, vcpkg, Notes</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CPython-VM/" rel="tag">CPython, VM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Leetcode/" rel="tag">Leetcode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Life/" rel="tag">Life</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Notes/" rel="tag">Notes</a></li></ul>
+    </div>
+  </div>
+
 
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Anime/" style="font-size: 10px;">Anime</a> <a href="/tags/Backup/" style="font-size: 10px;">Backup</a> <a href="/tags/C-STL/" style="font-size: 10px;">C++, STL</a> <a href="/tags/C-vcpkg-Notes/" style="font-size: 10px;">C++, vcpkg, Notes</a> <a href="/tags/CPython-VM/" style="font-size: 10px;">CPython, VM</a> <a href="/tags/LeetCode/" style="font-size: 10px;">LeetCode</a> <a href="/tags/Leetcode/" style="font-size: 15px;">Leetcode</a> <a href="/tags/Life/" style="font-size: 20px;">Life</a> <a href="/tags/Notes/" style="font-size: 20px;">Notes</a>
+    </div>
+  </div>
+
   
     
   <div class="widget-wrap">
@@ -406,6 +502,10 @@
       <ul>
         
           <li>
+            <a href="/2021/02/26/2021-02-26/">[开发环境]切换到vcpkg</a>
+          </li>
+        
+          <li>
             <a href="/2021/02/23/2021-02-23/">[编程随记]CPython 中的小整数池的实现</a>
           </li>
         
@@ -419,10 +519,6 @@
         
           <li>
             <a href="/2021/01/05/2020-01-01/">[最近的日常]2020年末装机杂记</a>
-          </li>
-        
-          <li>
-            <a href="/2020/11/23/2020-11-24/">[我的推荐列表]动画推荐列表</a>
           </li>
         
       </ul>

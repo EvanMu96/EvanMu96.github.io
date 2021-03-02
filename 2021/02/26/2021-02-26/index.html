@@ -4,14 +4,19 @@
   <meta charset="utf-8">
   
   
-  <title>归档: 2020/3 | Komoriii</title>
+  <title>[开发环境]切换到vcpkg | Komoriii</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Komoriii">
-<meta property="og:url" content="http://blog.senevan.com/archives/2020/03/index.html">
+  <meta name="description" content="过去看到 laike9m 的博客讲到他喜欢的编程语言，其中共鸣很深的一点是  Python is my favourite language, whose simplicity and powerfulness fascinates me. C++ is great, but writing C++ code is of less fun.  对于没有什么性能指标的个人项目我是很喜欢用 Pytho">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[开发环境]切换到vcpkg">
+<meta property="og:url" content="http://blog.senevan.com/2021/02/26/2021-02-26/index.html">
 <meta property="og:site_name" content="Komoriii">
+<meta property="og:description" content="过去看到 laike9m 的博客讲到他喜欢的编程语言，其中共鸣很深的一点是  Python is my favourite language, whose simplicity and powerfulness fascinates me. C++ is great, but writing C++ code is of less fun.  对于没有什么性能指标的个人项目我是很喜欢用 Pytho">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-26T02:10:31.000Z">
+<meta property="article:modified_time" content="2021-03-02T09:32:01.828Z">
 <meta property="article:author" content="Komoriii">
+<meta property="article:tag" content="C++, vcpkg, Notes">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternate" href="/atom.xml" title="Komoriii" type="application/atom+xml">
@@ -71,58 +76,79 @@
 </header>
 
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/03/25/2020-03-25/" class="archive-article-date">
-  <time class="dt-published" datetime="2020-03-24T16:22:56.000Z" itemprop="datePublished">3月 25</time>
+        <section id="main"><article id="post-2021-02-26" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/02/26/2021-02-26/" class="article-date">
+  <time class="dt-published" datetime="2021-02-26T02:10:31.000Z" itemprop="datePublished">2021-02-26</time>
 </a>
-      
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/03/25/2020-03-25/">[LeetCode] 数组的区间信息类型题目</a>
+    <h1 class="p-name article-title" itemprop="headline name">
+      [开发环境]切换到vcpkg
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2020/03/05/2020-03-05/" class="archive-article-date">
-  <time class="dt-published" datetime="2020-03-05T13:22:22.000Z" itemprop="datePublished">3月 5</time>
-</a>
+    <div class="e-content article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/03/05/2020-03-05/">[LeetCode] 994.腐烂的橘子</a>
-    </h1>
-  
+        <p>过去看到 laike9m 的博客讲到他喜欢的编程语言，其中共鸣很深的一点是</p>
+<blockquote>
+<p>Python is my favourite language, whose simplicity and powerfulness fascinates me. C++ is great, but writing C++ code is of less fun.</p>
+</blockquote>
+<p>对于没有什么性能指标的个人项目我是很喜欢用 Python 写的，同时在工作中写游戏服务器也大量用到 C++，每次想用 C++ 写一个个人项目时我就开始想 ”啊，又要一个 CMake 搞一下午了“ ，然后放弃。</p>
+<p>最近几年微软的开源产品的质量有了很大的提升，然后在了解到 vcpkg 可以兼容 CMake 之后决定把整个 C++ 工作环境迁移到 vcpkg 上。这篇文章用于积累我常用的 vcpkg 命令。</p>
+<h2 id="我的-C-工作环境"><a href="#我的-C-工作环境" class="headerlink" title="我的 C++ 工作环境"></a>我的 C++ 工作环境</h2><p>Windows : MSBuild/ CMake </p>
+<p>Linux/ MacOS: CMake</p>
+<p>所以我选择干脆把三台机器都装上 vcpkg。</p>
+<h2 id="简单的使用"><a href="#简单的使用" class="headerlink" title="简单的使用"></a>简单的使用</h2><p>场景：我想要写一些简单的 OpenGL 程序，需要用到的库大概有 glfw（动态或者静态库），glew（静态链接）另外我想用一个简单的日志库所以选择 spdlog。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/microsoft/vcpkg</span><br><span class="line"><span class="comment"># for windows</span></span><br><span class="line"><span class="comment"># bootstrap-vcpkg.bat</span></span><br><span class="line">sh bootstrap-vcpkg.sh</span><br></pre></td></tr></table></figure>
 
-    </header>
+<p>由于 vcpkg 完全托管在 GitHub 上的，更新的话只需要 pull 一下最新的代码就好了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> vcpkg &amp;&amp; git pull</span><br></pre></td></tr></table></figure>
+
+<p>查找以及安装依赖</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vcpkg search gl <span class="comment"># 可以搜很多很多到 OpenGL 和依赖到 OpenGL 的库</span></span><br><span class="line">vcpkg install glfw3 spdlog <span class="comment"># install with dynamic link</span></span><br><span class="line">vcpkg install glew:x86-windows-static <span class="comment"># install with static lib</span></span><br></pre></td></tr></table></figure>
+
+<p>如果使用的时 Visual Studio，一个命令就可以直接集成到开发环境中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.\vcpkg\vcpkg integrate install</span><br></pre></td></tr></table></figure>
+
+<p>构建项目的时候</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake .. -DCMAKE_TOOLCHAIN_FILE=.../vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows-static</span><br></pre></td></tr></table></figure>
+
+<h2 id="后续使用感想"><a href="#后续使用感想" class="headerlink" title="后续使用感想"></a>后续使用感想</h2><p>（待续）</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://blog.senevan.com/2021/02/26/2021-02-26/" data-id="cklrtbik7000y42oufqoc6ry1" data-title="[开发环境]切换到vcpkg" class="article-share-link">分享</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/C-vcpkg-Notes/" rel="tag">C++, vcpkg, Notes</a></li></ul>
+
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2021/02/23/2021-02-23/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">后一篇</strong>
+      <div class="article-nav-title">[编程随记]CPython 中的小整数池的实现</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
 
 
 </section>
