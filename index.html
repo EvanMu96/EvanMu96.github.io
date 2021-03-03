@@ -116,7 +116,10 @@
 <p>如果使用的时 Visual Studio，一个命令就可以直接集成到开发环境中</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.\vcpkg\vcpkg integrate install</span><br></pre></td></tr></table></figure>
 
-<p>构建项目的时候</p>
+<p>而如果使用 cmake，现在可以放心地在 CMakeLists.txt 里写</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">find_package(glfw3 CONFIG REQUIRED)</span><br><span class="line">target_link_libraries(main PRIVATE glfw)</span><br><span class="line"> </span><br><span class="line">find_package(spdlog CONFIG REQUIRED)</span><br><span class="line">target_link_libraries(main PRIVATE spdlog::spdlog spdlog::spdlog_header_only)</span><br><span class="line"></span><br><span class="line">find_package(GLEW REQUIRED)</span><br><span class="line">target_link_libraries(main PRIVATE GLEW::GLEW)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>然后生成时引入 vcpkg 的 toolchain file 就能够正常的找到依赖</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake .. -DCMAKE_TOOLCHAIN_FILE=.../vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows-static</span><br></pre></td></tr></table></figure>
 
 <h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>今天听 CppCast 正好听到了邀请 vcpkg 开发成员 Nicholas 的一期节目，Nicholas 提到他们希望 vcpkg 成为 C++ 生态中的 cargo（顺便黑了一把 Google 的 bazel。总体而言，如果微软能够延续 Visual Studio Code/ Windows Terminal/ winapi-rs 的这种对于开源的热情，未来肯定会从 Mac 生态中吸引来更多的开发者用户。</p>
@@ -124,7 +127,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2021/02/26/2021-02-26/" data-id="cklrwkchb000w4sokh60k230y" data-title="[开发环境]切换到vcpkg" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2021/02/26/2021-02-26/" data-id="cklt5m8dy000yqkoh8kkm7hvg" data-title="[开发环境]切换到vcpkg" class="article-share-link">分享</a>
       
       
       
@@ -195,7 +198,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2021/02/23/2021-02-23/" data-id="cklrwkchc000z4sokej3eghzw" data-title="[编程随记]CPython 中的小整数池的实现" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2021/02/23/2021-02-23/" data-id="cklt5m8dw000vqkoh0z211jvj" data-title="[编程随记]CPython 中的小整数池的实现" class="article-share-link">分享</a>
       
       
       
@@ -241,7 +244,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2021/02/02/2021-02-02/" data-id="cklrwkcha000u4sok8tux8e7b" data-title="[C++]实现std::move和std::forward" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2021/02/02/2021-02-02/" data-id="cklt5m8dv000tqkohfqkm5kdz" data-title="[C++]实现std::move和std::forward" class="article-share-link">分享</a>
       
       
       
@@ -284,7 +287,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2021/01/05/2021-01-02/" data-id="cklrwkch8000s4sok8gppcq76" data-title="[南来北往]京沪卧铺动车乘坐体验" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2021/01/05/2021-01-02/" data-id="cklt5m8du000rqkohc380dyxl" data-title="[南来北往]京沪卧铺动车乘坐体验" class="article-share-link">分享</a>
       
       
       
@@ -348,7 +351,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2021/01/05/2020-01-01/" data-id="cklrwkcgu00074sokbmaoe5jg" data-title="[最近的日常]2020年末装机杂记" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2021/01/05/2020-01-01/" data-id="cklt5m8dh0008qkohbe38h8v8" data-title="[最近的日常]2020年末装机杂记" class="article-share-link">分享</a>
       
       
       
@@ -422,7 +425,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/11/23/2020-11-24/" data-id="cklrwkch7000q4sok40ykhjwx" data-title="[我的推荐列表]动画推荐列表" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/11/23/2020-11-24/" data-id="cklt5m8dt000pqkohe48m0eeu" data-title="[我的推荐列表]动画推荐列表" class="article-share-link">分享</a>
       
       
       
@@ -474,7 +477,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/11/22/2020-11-23/" data-id="cklrwkch6000n4sokh79u5q81" data-title="[文章备份][转载]如何排解政治性抑郁" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/11/22/2020-11-23/" data-id="cklt5m8dr000mqkoh8utmdo6n" data-title="[文章备份][转载]如何排解政治性抑郁" class="article-share-link">分享</a>
       
       
       
@@ -525,7 +528,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/08/16/2020-08-16/" data-id="cklrwkch3000i4sok0rqs37r6" data-title="[最近的日常]成为了游戏服务器程序员" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/08/16/2020-08-16/" data-id="cklt5m8dq000lqkoh372zgwvi" data-title="[最近的日常]成为了游戏服务器程序员" class="article-share-link">分享</a>
       
       
       
@@ -655,7 +658,7 @@ return 0;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/03/25/2020-03-25/" data-id="cklrwkch5000l4sok75bldd3g" data-title="[LeetCode] 数组的区间信息类型题目" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/03/25/2020-03-25/" data-id="cklt5m8do000iqkoh8r413nxj" data-title="[LeetCode] 数组的区间信息类型题目" class="article-share-link">分享</a>
       
       
       
@@ -710,7 +713,7 @@ return 0;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://blog.senevan.com/2020/03/05/2020-03-05/" data-id="cklrwkch2000g4sok2hi5akgf" data-title="[LeetCode] 994.腐烂的橘子" class="article-share-link">分享</a>
+      <a data-url="http://blog.senevan.com/2020/03/05/2020-03-05/" data-id="cklt5m8dn000gqkoh4y3xa31v" data-title="[LeetCode] 994.腐烂的橘子" class="article-share-link">分享</a>
       
       
       
