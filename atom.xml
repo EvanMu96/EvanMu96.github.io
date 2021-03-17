@@ -6,7 +6,7 @@
   <link href="http://blog.senevan.com/atom.xml" rel="self"/>
   
   <link href="http://blog.senevan.com/"/>
-  <updated>2021-03-17T07:16:17.401Z</updated>
+  <updated>2021-03-17T13:27:27.486Z</updated>
   <id>http://blog.senevan.com/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="http://blog.senevan.com/2021/02/26/2021-02-26/"/>
     <id>http://blog.senevan.com/2021/02/26/2021-02-26/</id>
     <published>2021-02-26T02:10:31.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -46,7 +46,7 @@
     <link href="http://blog.senevan.com/2021/02/23/2021-02-23/"/>
     <id>http://blog.senevan.com/2021/02/23/2021-02-23/</id>
     <published>2021-02-23T08:53:10.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -70,7 +70,7 @@
     <link href="http://blog.senevan.com/2021/02/02/2021-02-02/"/>
     <id>http://blog.senevan.com/2021/02/02/2021-02-02/</id>
     <published>2021-02-02T08:57:41.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -93,7 +93,7 @@
     <link href="http://blog.senevan.com/2021/01/05/2021-01-02/"/>
     <id>http://blog.senevan.com/2021/01/05/2021-01-02/</id>
     <published>2021-01-04T16:08:40.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -117,7 +117,7 @@
     <link href="http://blog.senevan.com/2021/01/05/2020-01-01/"/>
     <id>http://blog.senevan.com/2021/01/05/2020-01-01/</id>
     <published>2021-01-04T16:00:45.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -146,7 +146,7 @@
     <link href="http://blog.senevan.com/2020/11/23/2020-11-24/"/>
     <id>http://blog.senevan.com/2020/11/23/2020-11-24/</id>
     <published>2020-11-22T16:36:13.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -169,7 +169,7 @@
     <link href="http://blog.senevan.com/2020/11/22/2020-11-23/"/>
     <id>http://blog.senevan.com/2020/11/22/2020-11-23/</id>
     <published>2020-11-22T15:47:32.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -188,11 +188,34 @@
   </entry>
   
   <entry>
+    <title>[工作笔记]分布式UID常见方案</title>
+    <link href="http://blog.senevan.com/2020/10/16/2020-10-15/"/>
+    <id>http://blog.senevan.com/2020/10/16/2020-10-15/</id>
+    <published>2020-10-16T05:42:16.000Z</published>
+    <updated>2021-03-17T13:27:27.486Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;游戏服务器在经历了长期的单体单进程之后，现代的MMO服务器为了伸缩性都设计成了分布式的设计。撇开较为新的不怎么 OOP 的 ECS 设计，大部分游戏程序都要把游戏中的道具、NPC、敌人、召唤物设计成对象，而这些对象在生成的时候也必须要有一个</summary>
+        
+      
+    
+    
+    
+    
+    <category term="UID, Work" scheme="http://blog.senevan.com/tags/UID-Work/"/>
+    
+  </entry>
+  
+  <entry>
     <title>[最近的日常]成为了游戏服务器程序员</title>
     <link href="http://blog.senevan.com/2020/08/16/2020-08-16/"/>
     <id>http://blog.senevan.com/2020/08/16/2020-08-16/</id>
     <published>2020-08-16T11:20:24.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -215,7 +238,7 @@
     <link href="http://blog.senevan.com/2020/03/25/2020-03-25/"/>
     <id>http://blog.senevan.com/2020/03/25/2020-03-25/</id>
     <published>2020-03-24T16:22:56.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -239,7 +262,7 @@
     <link href="http://blog.senevan.com/2020/03/05/2020-03-05/"/>
     <id>http://blog.senevan.com/2020/03/05/2020-03-05/</id>
     <published>2020-03-05T13:22:22.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -263,7 +286,7 @@
     <link href="http://blog.senevan.com/2020/02/26/2019-02-26/"/>
     <id>http://blog.senevan.com/2020/02/26/2019-02-26/</id>
     <published>2020-02-25T17:17:51.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -286,7 +309,7 @@
     <link href="http://blog.senevan.com/2020/02/15/2020-02-15/"/>
     <id>http://blog.senevan.com/2020/02/15/2020-02-15/</id>
     <published>2020-02-15T13:10:26.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -310,7 +333,7 @@
     <link href="http://blog.senevan.com/2020/02/08/2020-02-08/"/>
     <id>http://blog.senevan.com/2020/02/08/2020-02-08/</id>
     <published>2020-02-08T12:19:17.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -333,7 +356,7 @@
     <link href="http://blog.senevan.com/2020/01/26/2020-01-26/"/>
     <id>http://blog.senevan.com/2020/01/26/2020-01-26/</id>
     <published>2020-01-25T16:09:02.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -356,7 +379,7 @@
     <link href="http://blog.senevan.com/2019/02/08/2019-02-08/"/>
     <id>http://blog.senevan.com/2019/02/08/2019-02-08/</id>
     <published>2019-02-08T14:30:23.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
@@ -379,7 +402,7 @@
     <link href="http://blog.senevan.com/2019/01/19/%202019-01-19/"/>
     <id>http://blog.senevan.com/2019/01/19/%202019-01-19/</id>
     <published>2019-01-19T13:39:33.000Z</published>
-    <updated>2021-03-17T07:16:17.401Z</updated>
+    <updated>2021-03-17T13:27:27.486Z</updated>
     
     
       
